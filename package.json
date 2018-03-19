@@ -54,12 +54,19 @@
     }
   },
   "dependencies": {
+    "draft-js": "^0.10.5",
     "electron-compile": "^6.4.2",
     "electron-devtools-installer": "^2.2.3",
     "electron-squirrel-startup": "^1.0.0",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
+    "material-ui": "^0.20.0",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
     "react": "^15.6.2",
     "react-dom": "^15.6.2",
-    "react-hot-loader": "^3.1.3"
+    "react-hot-loader": "^3.1.3",
+    "socket.io-client": "^2.0.4"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -76,6 +83,7 @@
     "eslint-plugin-import": "^2.9.0",
     "eslint-plugin-jsx-a11y": "^5.1.1",
     "eslint-plugin-react": "^7.7.0",
-    "nodemon": "^1.17.2"
+    "nodemon": "^1.17.2",
+    "socket.io": "^2.0.4"
   }
 }
