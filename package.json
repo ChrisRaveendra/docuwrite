@@ -54,13 +54,14 @@
     }
   },
   "dependencies": {
+    "bcrypt": "^1.0.3",
+    "connect-mongo": "^2.0.1",
     "draft-js": "^0.10.5",
     "electron-compile": "^6.4.2",
     "electron-devtools-installer": "^2.2.3",
     "electron-squirrel-startup": "^1.0.0",
     "express": "^4.16.3",
     "express-session": "^1.15.6",
-    "jsonwebtoken": "^8.2.0",
     "material-ui": "^0.20.0",
     "mongoose": "^5.0.10",
     "passport": "^0.4.0",
