@@ -9,12 +9,16 @@ export default class TextEditor extends React.Component {
         super(props);
         this.state = { editorState: EditorState.createEmpty() };
         this.focus = () => {this.refs.editor.focus()};
-        this.onChange = (editorState) => this.setState({ editorState });
+        this.onChange = (editorState) => this.handleEditorChange(editorState);
+        this.focus = () => {
+          this.refs.editor.focus()
+        }
     }
 
     _onBoldClick(e) {
         e.preventDefault();
-        console.log(this);
+        //console.log(this);
+        console.log('Redux', this.props.editorState);
         this.onChange(RichUtils.toggleInlineStyle(
             this.state.editorState,
             'BOLD',
@@ -31,16 +35,12 @@ export default class TextEditor extends React.Component {
     }
 
     handleEditorChange(editorState) {
-      console.log(editorState)
-      debugger;
+    //  console.log(editorState)
+    //  debugger;
       this.setState({editorState});
-
       this.props.updateEditor(convertToRaw(editorState.getCurrentContent()));
     }
 
-    // focus = () => {
-    //   this.refs.editor.focus()
-    // }
 
     render() {
         return (
@@ -54,14 +54,17 @@ export default class TextEditor extends React.Component {
                     Italic
                 </button>
 
-                <Paper zDepth={5}>
+                <Paper zDepth={2}>
+                  <div
+                    onClick={this.focus}>
                     <Editor
                         className='editor'
-                        editorState={this.props.editorState}
+                        editorState={EditorState.acceptSelection(this.props.editorState, this.state.editorState.getSelection())}
                         onChange={this.handleEditorChange.bind(this)}
                         spellCheck={true}
                         ref='editor'
                     />
+                  </div>
                 </Paper>
             </div>
     );

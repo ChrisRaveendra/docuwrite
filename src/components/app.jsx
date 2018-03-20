@@ -47,6 +47,7 @@ const mapStateToProps = ({ editorState }) => ({ editorState });
 // });
 const mapDispatchToProps = (dispatch) => ({
   updateEditor: (editorState) => {
+    //debugger;
     dispatch({
       type: 'UPDATE_EDITOR_STATE',
       content: editorState,

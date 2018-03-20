@@ -17,10 +17,9 @@ const defaultState = { editorState: EditorState.createEmpty() };
 const reducer = (state = defaultState, action) => {
   switch (action.type) {
     case 'UPDATE_EDITOR_STATE':
-        console.log(action.content);
-        console.log('state to update:', EditorState.createWithContent(convertFromRaw(action.content)));
-        console.log('original state:', state.editorState);
-        //return EditorState.createWithContent(convertFromRaw(action.content));
+        // console.log(action.content);
+        // console.log('state to update:', EditorState.createWithContent(convertFromRaw(action.content)));
+        // console.log('original state:', state.editorState);
         return {
           ...state,
           editorState: EditorState.createWithContent(convertFromRaw(action.content))
