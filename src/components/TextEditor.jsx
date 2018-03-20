@@ -3,42 +3,45 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Editor, EditorState, RichUtils, convertToRaw } from 'draft-js';
 import Paper from 'material-ui/Paper';
+import Textbar from './Toolbar';
+import { Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle } from 'material-ui/Toolbar';
 
 export default class TextEditor extends React.Component {
+    //onChange is used to update the state of the Draft.js editor for any toolbox changes (bold, italics, etc)
     constructor(props) {
         super(props);
-        this.state = { editorState: EditorState.createEmpty() };
+
         this.focus = () => {this.refs.editor.focus()};
-        this.onChange = (editorState) => this.handleEditorChange(editorState);
-        this.focus = () => {
-          this.refs.editor.focus()
-        }
+        
+        this.onChange = (editorState, selectionState) => this.handleEditorChange(editorState, selectionState);
     }
 
+    // Update editor state & selection state then pass these new states to the UPDATE action
+    // This will result in the reducer signaling updates to the DOM
     _onBoldClick(e) {
         e.preventDefault();
-        //console.log(this);
-        console.log('Redux', this.props.editorState);
-        this.onChange(RichUtils.toggleInlineStyle(
-            this.state.editorState,
-            'BOLD',
-        ));
+
+        let newEditor = RichUtils.toggleInlineStyle(this.props.editorState,'BOLD');
+        let newSelection = newEditor.getSelection();
+
+        this.onChange(newEditor, newSelection);
     }
 
     _onItalicClick(e) {
         e.preventDefault();
         console.log(this);
         this.onChange(RichUtils.toggleInlineStyle(
-            this.state.editorState,
+            this.props.editorState,
             'ITALIC',
         ));
     }
 
-    handleEditorChange(editorState) {
-    //  console.log(editorState)
-    //  debugger;
-      this.setState({editorState});
-      this.props.updateEditor(convertToRaw(editorState.getCurrentContent()));
+    //Take in newly changed draftJS editor state & format correctly for use in redux Action
+    handleEditorChange(editorState, selectionState) {
+        this.props.updateEditor(
+            convertToRaw(editorState.getCurrentContent()), 
+            selectionState,
+        );
     }
 
 
@@ -46,99 +49,29 @@ export default class TextEditor extends React.Component {
         return (
             <div id='content'>
                 <h1>Draft.js Editor</h1>
-
-                <button type="button" onMouseDown = {this._onBoldClick.bind(this)}>
-                    Bold
-                </button>
-                <button type="button" onMouseDown = {this._onItalicClick.bind(this)}>
-                    Italic
-                </button>
-
+                        <button type="button" onMouseDown={this._onBoldClick.bind(this)}>
+                            Bold
+                    </button>
+                        <button type="button" onMouseDown={this._onItalicClick.bind(this)}>
+                            Italic
+                    </button>
                 <Paper zDepth={2}>
-                  <div
-                    onClick={this.focus}>
-                    <Editor
-                        className='editor'
-                        editorState={EditorState.acceptSelection(
-                          this.props.editorState,
-                          this.state.editorState.getSelection()
-                        )}
-                        onChange={this.handleEditorChange.bind(this)}
-                        spellCheck={true}
-                        ref='editor'
-                    />
-                  </div>
+                    <div
+                        onClick={this.focus}>
+                        
+                        <Editor
+                            className='editor'
+                            editorState={EditorState.acceptSelection(
+                            this.props.editorState,
+                            this.props.selectionState
+                            )}
+                            onChange={this.handleEditorChange.bind(this)}
+                            spellCheck={true}
+                            ref='editor'
+                        />
+                    </div>
                 </Paper>
             </div>
-    );
+        );
     }
 }
-// const TextEditor = ({updateEditor}) => {
-//   constructor(props) {
-//       super(props);
-//       //this.state = { editorState: EditorState.createWithContent(convertFromRaw(content)) };
-//       this.focus = () => {this.refs.editor.focus()};
-//       this.onChange = (editorState) => this.setState({ editorState });
-//   }
-//
-//   _onBoldClick(e) {
-//       e.preventDefault();
-//       console.log(this);
-//       this.onChange(RichUtils.toggleInlineStyle(
-//           this.state.editorState,
-//           'BOLD',
-//       ));
-//   }
-//
-//   _onItalicClick(e) {
-//       e.preventDefault();
-//       console.log(this);
-//       this.onChange(RichUtils.toggleInlineStyle(
-//           this.state.editorState,
-//           'ITALIC',
-//       ));
-//   }
-//
-//   _onClick(format) {
-//     console.log(format);
-//     this.onChange(this.props.handleFormat(format));
-//   }
-//
-//   handleEditorChange = (editorState) => {
-//     this.setState({editorState});
-//
-//     this.props.updateEditor({
-//       content: convertToRaw(editorState.getCurrentContent())
-//     });
-//   }
-//
-//   focus = () => {
-//     this.refs.editor.focus()
-//   }
-//
-//   render() {
-//     return (<div id='content'>
-//       <h1>Draft.js Editor</h1>
-//
-//       <button type="button" onMouseDown={this._onBoldClick.bind(this)}>
-//         Bold
-//       </button>
-//       <button type="button" onMouseDown={this._onItalicClick.bind(this)}>
-//         Italic
-//       </button>
-//       <button type="button" onMouseDown={this._onClick.bind(this, 'hello')}>
-//         Test
-//       </button>
-//
-//       <Paper zDepth={2}>
-//         <Editor
-//           className='editor'
-//           //editorState={EditorState.acceptSelection(this.props.editorState, this.state.editorState.getSelection())}
-//           editorState={this.props.editorState}
-//           onChange={this.handleEditorChange}
-//           spellCheck={true}
-//           ref='editor'/>
-//       </Paper>
-//     </div>);
-//   }
-// };
