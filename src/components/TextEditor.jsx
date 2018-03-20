@@ -8,24 +8,35 @@ export default class TextEditor extends React.Component {
     constructor(props) {
         super(props);
         this.state = { editorState: EditorState.createEmpty() };
+        this.focus = () => {this.refs.editor.focus()};
         this.onChange = (editorState) => this.setState({ editorState });
     }
-    _onBoldClick() {
+    _onBoldClick(e) {
+        e.preventDefault();
+
+        console.log(this);
         this.onChange(RichUtils.toggleInlineStyle(
             this.state.editorState,
             'BOLD',
         ));
+
     }
     render() {
         return (
             <div id='content'>
                 <h1>Draft.js Editor</h1>
-                <button onClick={this._onBoldClick.bind(this)}>Bold</button>
-                <Paper  zDepth={5}>
+
+                <button type="button" onMouseDown = {this._onBoldClick.bind(this)}>
+                    Bold
+                </button>
+
+                <Paper zDepth={5}>
                     <Editor
                         className='editor'
                         editorState={this.state.editorState}
                         onChange={this.onChange}
+                        spellCheck={true}
+                        ref='editor'
                     />
                 </Paper>
             </div >
