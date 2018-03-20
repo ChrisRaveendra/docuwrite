@@ -59,7 +59,10 @@ export default class TextEditor extends React.Component {
                     onClick={this.focus}>
                     <Editor
                         className='editor'
-                        editorState={EditorState.acceptSelection(this.props.editorState, this.state.editorState.getSelection())}
+                        editorState={EditorState.acceptSelection(
+                          this.props.editorState,
+                          this.state.editorState.getSelection()
+                        )}
                         onChange={this.handleEditorChange.bind(this)}
                         spellCheck={true}
                         ref='editor'

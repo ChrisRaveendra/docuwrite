@@ -23,9 +23,6 @@ let App = ({ updateEditor, editorState }) => {
     <div>
       <Toolbar/>
       <div style={inlineStyle()}>
-
-        <h2>Welcome to React!</h2>
-
         <TextEditor
           updateEditor={(editorState) => updateEditor(editorState)}
           editorState={editorState}
@@ -36,15 +33,7 @@ let App = ({ updateEditor, editorState }) => {
 }
 
 const mapStateToProps = ({ editorState }) => ({ editorState });
-//
-// const mapDispatchToProps = (dispatch) => ({
-//   updateEditor: (editorState) => {
-//     dispatch({
-//       type: 'UPDATE_EDITOR_STATE',
-//       content: editorState,
-//     })
-//   }
-// });
+
 const mapDispatchToProps = (dispatch) => ({
   updateEditor: (editorState) => {
     //debugger;
