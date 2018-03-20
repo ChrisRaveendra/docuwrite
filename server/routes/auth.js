@@ -1,45 +1,65 @@
 import express from 'express';
-const router = express.Router();
-import { User } from '../models/models';
 import crypto from 'crypto';
-import bodyParser from 'body-parser';
+import { User } from '../models/models';
 
-const hashPassword = (secret) => {
-  let hash = crypto.createHash('sha256');
-  hash.update(secret);
+
+function hashPassword(password) {
+  const hash = crypto.createHash('md5');
+  hash.update(password);
   return hash.digest('hex');
 }
+const router = express.Router();
 
+// TODO: include validation
 module.exports = {
-  secretRouter: function(passport) {
-    router.post('/signup', (req, res) => {
-      // TODO: this is assuming structure about front-end
-      // we are assuming backend will be passed four things
-      // 1. email
-      // 2. username
-      // 3. password
-      // 4. repeatPassword
-      if(req.body.password !== req.body.repeatPassword) {
-        return {
-          error: "Passwords don't match"
-        }
-      }
-
-      let newUser = new User({
-        username: req.body.username,
+  authRouter: function (passport) {
+    router.post('/signup', (req, res, next) => {
+      // TODO confirm that validation happens on frontend
+      const newUser = new User({
         email: req.body.email,
-        password: hashPassword(req.body.password)
+        username: req.body.username,
+        password: hashPassword(req.body.password),
       });
-
       newUser.save()
-      .then(user => user)
       .catch((err) => {
-        console.log('Error in signup passport\n'+err);
-        return {
-          status: 500,
-          error: err
-        }
+        console.log('Error in saving new user\n', err);
+        return res.status(500).json({
+          success: false,
+          message: 'Signup failed',
+        });
       })
+      .then((user) => {
+        if (!user) {
+          return res.status(500).json({
+            success: false,
+            message: 'Signup did not save user',
+          });
+        }
+        return res.status(200).json({
+          success: true,
+          user,
+        });
+      });
+    });
+
+    router.post('/login', (req, res, next) => {
+      req.body.username = req.body.email;
+      next();
+    }, passport.authenticate('local'), (req, res, next) => {
+      // TODO return some object for axios
+      res.json({
+        success: true,
+        user: req.user,
+      });
+    });
+
+    router.get('/logout', (req, res, next) => {
+      req.logout();
+      res.status(200).json({
+        success: true,
+      });
     })
-  }
-}
+    return router;
+  },
+  hashPassword,
+};
