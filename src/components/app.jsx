@@ -3,6 +3,9 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import Toolbar from './Toolbar';
 import TextEditor from './TextEditor';
 
+import {connect} from 'react-redux';
+//import {handleFormat} from '../actions/index';
+
 const inlineStyle = () => ({
   // 'width': '1000px',
   // 'height': '500px',
@@ -15,19 +18,42 @@ const inlineStyle = () => ({
   // 'backgroundColor': input.guessed ? 'red' : 'yellow'
 });
 
-export default class App extends React.Component {
-  render() {
-    return (
-      <MuiThemeProvider>
-        <div>
-          <Toolbar />
-            <div style={inlineStyle()}>
+let App = ({ updateEditor, editorState }) => {
+  return (<MuiThemeProvider>
+    <div>
+      <Toolbar/>
+      <div style={inlineStyle()}>
 
-              <h2>Welcome to React!</h2>
+        <h2>Welcome to React!</h2>
 
-              <TextEditor />
-            </div>
-        </div>
-      </MuiThemeProvider>);
-  }
+        <TextEditor
+          updateEditor={(editorState) => updateEditor(editorState)}
+          editorState={editorState}
+        />
+      </div>
+    </div>
+  </MuiThemeProvider>);
 }
+
+const mapStateToProps = ({ editorState }) => ({ editorState });
+//
+// const mapDispatchToProps = (dispatch) => ({
+//   updateEditor: (editorState) => {
+//     dispatch({
+//       type: 'UPDATE_EDITOR_STATE',
+//       content: editorState,
+//     })
+//   }
+// });
+const mapDispatchToProps = (dispatch) => ({
+  updateEditor: (editorState) => {
+    dispatch({
+      type: 'UPDATE_EDITOR_STATE',
+      content: editorState,
+    })
+  }
+});
+
+App = connect(mapStateToProps, mapDispatchToProps)(App);
+
+export default App;
