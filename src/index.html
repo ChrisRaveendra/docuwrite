@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="stylesheet" type="text/css" media="screen" href="style.css" />
 </head>
-<body style="overflow: hidden; background-color: rgba(0,0,0,0); margin: 0" >
+<body style="overflow: auto; margin: 0" >
   <div id="App"></div>
 </body>
 
@@ -12,8 +13,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {AppContainer} from 'react-hot-loader';
 
+
 const render = () => {
-  const App = require('./app').default;
+  const App = require('./components/app').default;
   ReactDOM.render(<AppContainer><App /></AppContainer>, document.getElementById('App'));
 }
 

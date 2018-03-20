@@ -50,7 +50,7 @@ passport.deserializeUser((id, done) => User.findById(id, (err, user) => done(err
 
 // Passport Strategy
 passport.use(new LocalStrategy((email, password, done) => {
-  User.findOne({ email: email }).exec()
+  User.findOne({ email }).exec()
   .then((user) => {
     if (!user) {
       console.log(user);
