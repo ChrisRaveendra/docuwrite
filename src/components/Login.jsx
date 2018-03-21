@@ -3,8 +3,9 @@ import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 import Paper from 'material-ui/Paper';
 import axios from 'axios';
+import { connect } from 'react-redux';
 // axios.defaults.baseURL = 'https://localhost:3000';
-export default class Login extends React.Component {
+class Login extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -30,15 +31,17 @@ export default class Login extends React.Component {
     // console.log(url);
     axios.post(url, {
       email: this.state.email,
+      username: this.state.username,
       password: this.state.password,
     })
-    .then(({ data }) => console.log(data))
+    .then(({ data }) => this.props.changeStateTo(data))
     .catch(err => console.log(err));
   }
 
   render() {
     return (
       <div>
+        <pre>{JSON.stringify(this.props.myRenamedState)}</pre>
         <Paper >
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '30px' }}>
             <TextField
@@ -90,3 +93,40 @@ export default class Login extends React.Component {
     );
   }
 }
+
+const mapStateToProps = (state) => ({
+  myRenamedState: state.loggedIn
+});
+
+const mapStateToDispatch = (dispatch) => ({
+  changeStateTo: data => dispatch({ type: 'USER_LOGIN', data })
+});
+
+export default connect( mapStateToProps, mapStateToDispatch )(Login)
+
+
+//
+//
+//
+//
+//
+// function connect(mapStateToProps, mapStateToDispatch) {
+//   return function(component) {
+//     return class myWrapper {
+//       componentWillMount() {
+//         reduxStore.onChange((newState) => {
+//           const props = mapStateToProps(newState)
+//           const propsMore = mapStateToDispatch(store.dispatch)
+//
+//           this.setState({triggerRerender: {...props, ...propsMore}})
+//         })
+//       }
+//
+//       render() {
+//         return <component myRenamedState=/>
+//       }
+//     }
+//   }
+// }
+//
+//

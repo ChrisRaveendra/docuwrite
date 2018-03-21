@@ -35,9 +35,11 @@ module.exports = {
             message: 'Signup did not save user',
           });
         }
+        console.log(user);
         return res.status(200).json({
           success: true,
           userID: user._id,
+          username: user.username
         });
       });
     });
@@ -47,10 +49,11 @@ module.exports = {
       next();
     }, passport.authenticate('local'), (req, res, next) => {
       // TODO return some object for axios
-      console.log(req.session);
+      console.log(req.user);
       res.json({
         success: true,
         userID: req.user._id,
+        username: req.user.username
       });
     });
 
