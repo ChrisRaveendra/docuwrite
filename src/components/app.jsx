@@ -2,7 +2,8 @@ import React from 'react';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import Toolbar from './Toolbar';
 import TextEditor from './TextEditor';
-
+import Login from './Login';
+import Home from './Home';
 const inlineStyle = () => ({
   // 'width': '1000px',
   // 'height': '500px',
@@ -20,12 +21,12 @@ export default class App extends React.Component {
     return (
       <MuiThemeProvider>
         <div>
-          <Toolbar />
+          {/* <Toolbar /> */}
             <div style={inlineStyle()}>
 
               <h2>Welcome to React!</h2>
-
-              <TextEditor />
+              <Login />
+              {/* <TextEditor /> */}
             </div>
         </div>
       </MuiThemeProvider>);

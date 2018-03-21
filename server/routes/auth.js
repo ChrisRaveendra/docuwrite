@@ -22,10 +22,10 @@ module.exports = {
       });
       newUser.save()
       .catch((err) => {
-        console.log('Error in saving new user\n', err);
+        console.log('Error in saving new user ', err.code);
         return res.status(500).json({
           success: false,
-          message: 'Signup failed',
+          message: err.code === 11000 ? 'Email address taken' : 'Signup failed',
         });
       })
       .then((user) => {
@@ -37,7 +37,7 @@ module.exports = {
         }
         return res.status(200).json({
           success: true,
-          user,
+          userID: user._id,
         });
       });
     });
@@ -47,9 +47,10 @@ module.exports = {
       next();
     }, passport.authenticate('local'), (req, res, next) => {
       // TODO return some object for axios
+      console.log(req.session);
       res.json({
         success: true,
-        user: req.user,
+        userID: req.user._id,
       });
     });
 
