@@ -14,7 +14,7 @@ const reducer = (state = defaultState, action) => {
     //GOAL: To update state & signal the correct visual changes but have modular access to the different components (editor, selection, content)
     case 'UPDATE_EDITOR_STATE':
         // debugger;
-        console.log(action.editor.toJS())
+      //  console.log(action.editor.toJS())
         return {
           ...state,
           editorState: action.editor,

@@ -32,8 +32,9 @@ const inlineStyle = () => ({
 
 let App = ({ updateEditor, /*updateSelection*/ editorState, selectionState, loggedIn}) => {
   return (<MuiThemeProvider>
-    {!loggedIn ? (<Login />) :
-      (<div>
+    {/* {!loggedIn ? (<Login />) : */}
+      {/* ( */}
+        <div>
         <Textbar/>
         <div style={inlineStyle()}>
           <TextEditor
@@ -43,8 +44,9 @@ let App = ({ updateEditor, /*updateSelection*/ editorState, selectionState, logg
             selectionState={selectionState}
           />
         </div>
-      </div>)
-    }
+      </div>
+    {/* ) */}
+    {/* } */}
 
   </MuiThemeProvider>);
 }
