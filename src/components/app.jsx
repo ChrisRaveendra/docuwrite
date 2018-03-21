@@ -4,7 +4,7 @@ import Textbar from './Toolbar';
 import TextEditor from './TextEditor';
 
 import {connect} from 'react-redux';
-import {handleEditor, handleSelection} from '../actions/index';
+import {handleEditor} from '../actions/index';
 
 const inlineStyle = () => ({
   // 'width': '1000px',
