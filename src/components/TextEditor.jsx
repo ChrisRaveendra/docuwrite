@@ -8,17 +8,6 @@ import Textbar from './Toolbar';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
 import createStyles from 'draft-js-custom-styles';
 
-const customStyleMap = {
-  MARK: {
-    backgroundColor: 'Yellow',
-    fontStyle: 'italic'
-  }
-};
-
-// Passing the customStyleMap is optional
-const {styles, customStyleFn, exporter} = createStyles([
-  'font-size', 'color', 'font-weight', 'font-style', 'text-decoration', 'text-align'
-], 'CUSTOM_', customStyleMap);
 
 export default class TextEditor extends React.Component {
   //onChange is used to update the state of the Draft.js editor for any toolbox changes (bold, italics, etc)
@@ -27,29 +16,6 @@ export default class TextEditor extends React.Component {
   }
   // Update editor state & selection state then pass these new states to the UPDATE action
   // This will result in the reducer signaling updates to the DOM
-  toggleBold = (e) => {
-    e.preventDefault();
-    const newEditorState = styles.fontWeight.toggle(this.props.editorState, 'bold');
-    this.handleEditorChange(newEditorState);
-  };
-
-  toggleItalic = (e) => {
-    e.preventDefault();
-    const newEditorState = styles.fontStyle.toggle(this.props.editorState, 'italic');
-    this.handleEditorChange(newEditorState);
-  };
-
-  toggleUnderline = (e) => {
-    e.preventDefault();
-    const newEditorState = styles.textDecoration.toggle(this.props.editorState, 'underline');
-    this.handleEditorChange(newEditorState);
-  };
-
-  toggleUnderline = (e) => {
-    e.preventDefault();
-    const newEditorState = styles.textDecoration.toggle(this.props.editorState, 'underline');
-    this.handleEditorChange(newEditorState);
-  };
 
   setAlign = () => {
     // e.preventDefault();
@@ -73,35 +39,19 @@ export default class TextEditor extends React.Component {
 
   render() {
     return (<div id='content'>
-      <h1>Draft.js Editor</h1>
-
-      <button type="button" onMouseDown={this.toggleBold}>
-        Bold
-      </button>
-      <button type="button" onMouseDown={this.toggleItalic}>
-        Italic
-      </button>
-      <button type="button" onMouseDown={this.toggleUnderline}>
-        Underline
-      </button>
-
-      <button type="button" onMouseDown={(e) => {e.preventDefault(); this.setAlign('center')}}>
-        Left
-      </button>
-      {/* <button type="button" onMouseDown={this.setAlign('center')}>
-        Center
-      </button>
-      <button type="button" onMouseDown={this.setAlign('right')}>
-        Right
-      </button> */}
+      <h1>Welcome to doCuwRitE</h1>
 
       <Paper zDepth={2}>
+            <Textbar
+                updateEditor={this.props.updateEditor}
+                editorState={this.props.editorState}
+            />
         <Editor className='editor'
                 editorState={this.props.editorState}
                 onChange={this.handleEditorChange}
-                spellCheck={true} ref='editor'
-                customStyleFn={customStyleFn}
-                customStyleMap={customStyleMap} />
+                spellCheck={true} 
+                ref='editor' 
+        />
       </Paper>
     </div>);
   }
