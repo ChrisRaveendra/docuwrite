@@ -8,6 +8,17 @@ import Textbar from './Toolbar';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
 import createStyles from 'draft-js-custom-styles';
 
+const customStyleMap = {
+  MARK: {
+    backgroundColor: 'Yellow',
+    fontStyle: 'italic'
+  }
+};
+
+// Passing the customStyleMap is optional
+const {styles, customStyleFn, exporter} = createStyles([
+  'font-size', 'color', 'font-weight', 'font-style', 'text-decoration', 'text-align'
+], 'CUSTOM_', customStyleMap);
 
 export default class TextEditor extends React.Component {
   //onChange is used to update the state of the Draft.js editor for any toolbox changes (bold, italics, etc)
@@ -49,9 +60,9 @@ export default class TextEditor extends React.Component {
         <Editor className='editor'
                 editorState={this.props.editorState}
                 onChange={this.handleEditorChange}
-                spellCheck={true} 
-                ref='editor' 
-        />
+                spellCheck={true} ref='editor'
+                customStyleFn={customStyleFn}
+                customStyleMap={customStyleMap} />
       </Paper>
     </div>);
   }
