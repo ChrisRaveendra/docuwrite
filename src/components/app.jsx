@@ -4,6 +4,7 @@
  import TextEditor from './TextEditor';
  import Login from './Login';
  import Home from './Home';
+ import Document from './Document';
  // import io from 'socket-io-client';
  // const socket = null;
 
@@ -33,24 +34,11 @@
    justifyContent: 'center',
  });
 
- let App = ({ updateEditor, /* updateSelection */ editorState, selectionState, loggedIn, socket, room, currDOC }) => (<MuiThemeProvider>
-   {!loggedIn ? (<Login />) : (<Home />)
-    //  (room && currDOC ?
-    //    (<div>
-    //          <Textbar/>
-    //          <div style={inlineStyle()}>
-    //            <TextEditor
-    //              updateEditor={updateEditor}
-    //              // updateSelection={(selectionState) => updateSelection(selectionState)}
-    //              editorState={editorState}
-    //              selectionState={selectionState}
-    //            />
-    //          </div>
-    //        </div>)
-    //        : (<Home />)
-    // )
-  }
-
+ let App = ({ updateEditor, /* updateSelection */ editorState, selectionState, loggedIn, socket, room, currDOC }) =>
+ (<MuiThemeProvider>
+   {!loggedIn ? (<Login />) :
+     (room && currDOC ? (<Document />) : (<Home />))
+   }
  </MuiThemeProvider>);
 
  const mapStateToProps = ({ editorState, selectionState, socket, room, currDOC, loggedIn}) => ({
