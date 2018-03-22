@@ -39,7 +39,7 @@ let App = ({ updateEditor, /*updateSelection*/ editorState, selectionState}) => 
   </MuiThemeProvider>);
 }
 
-const mapStateToProps = ({ editorState, selectionState }) => ({ editorState, selectionState});
+const mapStateToProps = ({ editorState, selectionState }) => ({ editorState, selectionState });
 
 const mapDispatchToProps = (dispatch) => ({
   updateEditor: (editorState, selectionState) => {

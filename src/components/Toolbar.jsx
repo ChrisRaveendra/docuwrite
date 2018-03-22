@@ -26,6 +26,7 @@ import FormatListNumbered from 'material-ui/svg-icons/editor/format-list-Numbere
 
 
 import createStyles from 'draft-js-custom-styles';
+import {connect} from 'react-redux';
 
 const customStyleMap = {
   MARK: {
@@ -40,10 +41,10 @@ const { styles, customStyleFn, exporter } = createStyles([
 ], 'CUSTOM_', customStyleMap);
 
 export default class Textbar extends React.Component {
-
   toggleBold = (e) => {
     e.preventDefault();
     const newEditorState = styles.fontWeight.toggle(this.props.editorState, 'bold');
+    console.log(this)
     this.handleEditorChange(newEditorState);
   };
 
@@ -65,32 +66,38 @@ export default class Textbar extends React.Component {
   }
 
   render() {
+    let styles = this.props.editorState.getCurrentInlineStyle().toJS();
     return (
       <div style={{
         'position': 'sticky',
         'top': '0px'
       }}>
         <Toolbar title="My Toolbar" style={{'display':'flex', 'alignItems': 'center'}}>
-          
-          <FormatBold onMouseDown={this.toggleBold}/>
-          
-          <FormatItalic onMouseDown={this.toggleItalic}/>
 
-          <FormatUnderlined onMouseDown={this.toggleUnderline}/>
+          <FormatBold onMouseDown={this.toggleBold}
+                      color={styles.includes("CUSTOM_FONT_WEIGHT_bold") ? 'black' : 'white'}
+                    />
 
-          <FormatAlignLeft />
+          <FormatItalic onMouseDown={this.toggleItalic}
+                        color={styles.includes("CUSTOM_FONT_STYLE_italic") ? 'black' : 'white'}
+                      />
 
-          <FormatAlignCenter />
+          <FormatUnderlined onMouseDown={this.toggleUnderline}
+                            color={styles.includes("CUSTOM_TEXT_DECORATION_underline") ? 'black' : 'white'}/>
 
-          <FormatAlignRight />
+          <FormatAlignLeft hoverColor={'black'} color={'white'}/>
 
-          <FormatSize />
+          <FormatAlignCenter hoverColor={'black'} color={'white'}/>
 
-          <FormatColorText />
+          <FormatAlignRight hoverColor={'black'} color={'white'}/>
 
-          <FormatListBulleted />
+          <FormatSize hoverColor={'black'} color={'white'}/>
 
-          <FormatListNumbered />
+          <FormatColorText hoverColor={'black'} color={'black'}/>
+
+          <FormatListBulleted hoverColor={'black'} color={'white'}/>
+
+          <FormatListNumbered hoverColor={'black'} color={'white'}/>
 
         </Toolbar>
       </div>
