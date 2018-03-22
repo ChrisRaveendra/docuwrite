@@ -160,11 +160,6 @@ io.on('connection', (socket) => {
       })
   });
 
-  socket.on('leave-document', (docAuth, ackCB) => {
-    // TODO assuming no auto-Save
-    socket.leave(sharedDocs[docAuth.docID]);
-    // TODO
-  });
 
   socket.on('disconnect', () => {
     console.log('A user disconnected at', new Date().toLocaleString());
