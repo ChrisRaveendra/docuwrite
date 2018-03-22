@@ -1,7 +1,20 @@
 .public-DraftEditor-content {
-    max-height: 2000px;
-    overflow: auto;
+    min-height: calc(100vh - 160px);
+    overflow: visible;
     padding: 10px;
+}
+
+.DraftEditor-root {
+    min-height: calc(100vh - 160px);
+}
+
+.DraftEditor-editorContainer {
+    min-height: calc(100vh - 160px);
+}
+
+html, html * {
+    /* min-height: 100%; */
+    /* outline: 1px solid; */
 }
 
 body {
@@ -13,8 +26,8 @@ body {
 }
 
 #content {
-    width: 480px;
-    margin: 1px;
+    width: 850px;
+    margin: 0 auto;
 }
 /* .editor {
     border: 1px solid grey;
