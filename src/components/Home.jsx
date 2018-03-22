@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-// import Dialog from 'material-ui/Dialog';
+import Dialog from 'material-ui/Dialog';
 import RaisedButton from 'material-ui/RaisedButton';
-// import FlatButton from 'material-ui/FlatButton';
+import FlatButton from 'material-ui/FlatButton';
 import Paper from 'material-ui/Paper';
 import {
   Table,
@@ -36,13 +36,10 @@ class Home extends React.Component {
     this.state = {
       documents: [],
       selected: [],
+      dialogOpen: false,
     };
   }
 
-
-  // handleClose() {
-  //   this.setState({ isDialogOpen: false });
-  // }
   componentWillMount() {
     axios.get('http://localhost:3000/docs').then(({ data }) => {
       if (data.success) {
@@ -54,26 +51,37 @@ class Home extends React.Component {
     axios.get('http://localhost:3000/newdoc')
     .then(({ data }) => {
       if (data.success) {
-        const newDocs = this.state.documents.map(doc => Object.assign({}, doc));
-        newDocs.push(data.docs);
-        this.setState({ documents: newDocs });
+        this.props.socket.emit('join-document', { userID: this.props.userID, docID: this.state.documents[rowNum]._id}, ({room, state}) => {
+          if (room) {
+            this.props.joinDoc(room, state, { docID: this.state.documents[rowNum]._id});
+          }
+        });
       }
     })
     .catch(err => console.log(err));
   }
   deleteDocs() {
-    // e.preventDefault();
-    const { selected } = this.state;
-    console.log(selected);
+    const selectedDocIDs = this.state.documents
+                          .filter((x, index) => this.state.selected.indexOf(index) > -1)
+                          .map(doc => doc._id);
+    this.props.socket.emit('delete-document',
+    { docIDs: selectedDocIDs, userID: this.props.userID},
+    ({success, errors}) => {
+      let newDocs = this.state.documents.filter((doc) => Object.keys(success).indexOf(doc._id) < 0).map(doc => Object.assign({}, doc));
+      this.setState({ dialogOpen: false, selected: [] , documents: newDocs });
+    })
   }
 
-  shareDocs() {
+  shareDocs(e) {
+    console.log('hello from share');
+    debugger;
+    e.preventDefault();
     const { selected } = this.state;
-    console.log(selected);
+    console.log(this.state.documents.filter((x, index) => selected.indexOf(index) > -1));
+    this.props.socket.emit('share-document', { docIDs: this.state.documents.filter((x, index) => selected.indexOf(index) > -1)})
   }
   openDoc(rowNum, colNum) {
-    console.log('in openDoc', rowNum, colNum);
-    console.log(this.state.documents[rowNum]);
+    // console.log('in openDoc', rowNum, colNum);
     if (this.state.documents[rowNum]) {
       this.props.socket.emit('join-document', { userID: this.props.userID, docID: this.state.documents[rowNum]._id}, ({room, state}) => {
         if (room) {
@@ -83,6 +91,15 @@ class Home extends React.Component {
     }
   }
 
+  logOut() {
+    axios.get('http://localhost:3000/logout')
+    .catch(err => console.log('error in logging out: ', err))
+    .then((data) => {
+      this.props.socket.disconnect();
+      this.props.logout();
+    })
+  }
+  
   render() {
     const dateStyles = {
       weekday: 'short',
@@ -93,16 +110,37 @@ class Home extends React.Component {
       minute: '2-digit',
       second: '2-digit',
     };
+    
     const amISelected = (index) => {
       if (typeof this.state.selected === 'string') {
         return this.state.selected === 'all';
       }
       return this.state.selected.indexOf(index) > -1;
     };
-
+    const actions = [
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={(e)=> this.deleteDocs(e)}
+      />,
+      <FlatButton
+        label="Delete Forever"
+        secondary={true}
+        onClick={(e)=> this.deleteDocs(e)}
+      />,
+    ];
     const anythingSelected = this.state.selected.length < 1;
     return (<div>
       <Paper>
+        <Dialog
+          actions={actions}
+          modal={false}
+          open={this.state.dialogOpen}
+          onRequestClose={(e)=> this.deleteDocs(e)}
+        >
+          Delete Forever?
+        </Dialog>
+
         <Toolbar>
           <ToolbarTitle text={`Welcome ${this.props.loggedIn}`} />
           <ToolbarGroup>
@@ -114,7 +152,7 @@ class Home extends React.Component {
               <AddContentIcon style={{nativeColor: 'white'}} />
             </IconButton>
             <IconButton
-              onClick={() => this.deleteDocs()}
+              onClick={() => this.setState({ dialogOpen: true })}
               disabled={anythingSelected}
               tooltip="delete forever"
               tooltipPosition="bottom-right"
@@ -122,16 +160,13 @@ class Home extends React.Component {
               <DeleteForeverIcon />
             </IconButton>
             <IconButton
-              onClick={() => this.shareDocs()}
+              onClick={(e) => this.shareDocs(e)}
               disabled={anythingSelected}
               tooltip="share"
               tooltipPosition="bottom-right"
             >
               <SocialShareIcon />
             </IconButton>
-          {/* </ToolbarGroup>
-          <ToolbarSeparator />
-          <ToolbarGroup> */}
             <IconMenu
               anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
               iconButtonElement={
@@ -140,14 +175,16 @@ class Home extends React.Component {
                 </IconButton>}
             >
               <MenuItem primaryText="Hire us" />
-              <MenuItem primaryText="Logout" />
+              <MenuItem
+                onClick={() => this.logOut()}
+                primaryText="Logout"
+              />
             </IconMenu>
           </ToolbarGroup>
         </Toolbar>
         <Table
           fixedHeader
           multiSelectable
-          enableSelectAll
           onRowSelection={selectedRows => this.setState({ selected: selectedRows })}
           onCellClick={(i, j) =>  j < 0 ? null : this.openDoc(i, j) }
         >
@@ -158,7 +195,7 @@ class Home extends React.Component {
               <TableHeaderColumn>Owned By</TableHeaderColumn>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody deselectOnClickaway={false}>
             {this.state.documents.map((doc, index) => (
               <TableRow
                 key={doc.id}
@@ -193,6 +230,7 @@ const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket }) => ({
 
 const mapStateToDispatch = dispatch => ({
   joinDoc: (room, state, docID) => dispatch({ type: 'JOIN_DOC', room, state, docID }),
+  logout: () => dispatch({ type: 'LOGOUT' })
 });
 
 export default connect(mapStateToProps, mapStateToDispatch)(Home);

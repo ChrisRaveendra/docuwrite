@@ -35,14 +35,36 @@ const reducer = (state = defaultState, action) => {
       return {
         ...state,
         currDOC: action.docID,
-        currState: action.state,
+        editorState: action.state ? EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))) : EditorState.createEmpty(),
         room: action.room,
       };
+    case 'UPDATE_DOC':
+      debugger;
+      return {
+        ...state,
+        editorState: action.state ? EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))) : EditorState.createEmpty(),
+      };
+    case 'LEAVE_DOC':
+      return {
+      ...state,
+      currDOC: null,
+      currState: null,
+      room: null
+    }
     case 'UPDATE_THEME':
       return {
         ...state,
         isDarkTheme: !action.isDarkTheme,
       };
+    case 'LOGOUT':
+      return {
+        ...state,
+        loggedIn: null,
+        currDOC: null,
+        currState: null,
+        room: null,
+        socket: null,
+      }
     default:
       return state;
   }

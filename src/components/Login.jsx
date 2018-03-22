@@ -28,13 +28,12 @@ class Login extends React.Component {
 
   handleSubmit() {
     const url = `http://localhost:3000/${this.state.isLogin ? 'login' : 'signup'}`;
-    // console.log(url);
     axios.post(url, {
       email: this.state.email,
       username: this.state.username,
       password: this.state.password,
     })
-    .then(({ data }) => this.props.changeStateTo(data) )
+    .then(({ data }) => this.props.changeStateTo(data))
     .catch(err => console.log(err));
   }
 
