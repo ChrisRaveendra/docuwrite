@@ -10,7 +10,7 @@ import Toggle from 'material-ui/Toggle'
 
 
 import {connect} from 'react-redux';
-import {handleEditor, handleThemeChange, handleUpdate} from '../actions/index';
+import {handleEditor, handleThemeChange, handleUpdate, handleExit} from '../actions/index';
 
 const inlineStyle = () => ({
   // 'width': '1000px',
@@ -25,38 +25,38 @@ const inlineStyle = () => ({
 
 });
 
-const Document = ({ updateEditor, updateDoc, editorState, selectionState, isDarkTheme, changeTheme }) => {
+const Document = ({ updateEditor, editorState, isDarkTheme, changeTheme, currDOC, socket, leaveDoc }) => {
 
   return (<MuiThemeProvider muiTheme={getMuiTheme(!isDarkTheme ? lightBaseTheme : darkBaseTheme)}>
     <div>
-      <Toggle onToggle={() => changeTheme(isDarkTheme)}/>
-      {/* <Textbar
-        updateEditor={updateEditor}
-        editorState={editorState}
-      /> */}
-      <div style={inlineStyle()}>
-        <TextEditor
-          updateEditor={updateEditor}
-          // updateSelection={(selectionState) => updateSelection(selectionState)}
-          editorState={editorState}
-          selectionState={selectionState}
-          handleUpdate={updateDoc}
-        />
-      </div>
+        <Toggle onToggle={() => {
+          changeTheme(isDarkTheme);
+          document.body.style.backgroundColor = !isDarkTheme ? "#3c3b3b" : "#f6f7f9";
+        }}/>
+        <div style={inlineStyle()}>
+          <TextEditor
+            updateEditor={updateEditor}
+            editorState={editorState}
+            currDOC={currDOC}
+            socket={socket}
+            leaveDoc={leaveDoc}
+          />
+        </div>
     </div>
   </MuiThemeProvider>);
 }
 
-const mapStateToProps = ({ editorState, selectionState, isDarkTheme }) => ({ editorState, selectionState, isDarkTheme });
+const mapStateToProps = ({ editorState, isDarkTheme, currDOC, socket }) => ({ editorState, isDarkTheme, currDOC, socket });
 
 const mapDispatchToProps = (dispatch) => ({
-  updateEditor: (editorState, selectionState) => {
-    dispatch(handleEditor(editorState, selectionState));
+  updateEditor: (editorState) => {
+    dispatch(handleEditor(editorState));
   },
   changeTheme: (isDarkTheme) => {
     dispatch(handleThemeChange(isDarkTheme))
   },
-  updateDoc: state => dispatch(handleUpdate(state))
+  updateDoc: state => dispatch(handleUpdate(state)),
+  leaveDoc: () => dispatch(handleExit()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Document);

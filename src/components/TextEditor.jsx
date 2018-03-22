@@ -39,7 +39,7 @@ const {styles, customStyleFn, exporter} = createStyles([
   'font-size', 'color', 'font-weight', 'font-style', 'text-decoration', 'text-align'
 ], 'CUSTOM_', customStyleMap);
 
-export default class TextEditor extends React.Component {
+class TextEditor extends React.Component {
   // Update editor state & selection state then pass these new states to the UPDATE action
   // This will result in the reducer signaling updates to the DOM
 
@@ -83,14 +83,8 @@ export default class TextEditor extends React.Component {
 
     stringState = JSON.stringify(stringState);
     console.log(stringState);
-    this.props.socket.emit('update-document', { userID: this.props.userID, docID: this.props.currDOC.docID, state: stringState}, ({ room, state }) => {
-      console.log('reached!')
-      console.log(room, state)
-
-      if (room) {
-        console.log('reached2!')
-        this.props.joinDoc(room, state, { docID: this.state.documents[rowNum]._id });
-      }
+    this.props.socket.emit('update-document', { userID: this.props.userID, docID: this.props.currDOC.docID, state: stringState,}, ({ room, state, title }) => {
+      console.log('success?!')
     });
   }
 
@@ -100,16 +94,20 @@ export default class TextEditor extends React.Component {
     stringState = JSON.stringify(stringState);
     this.props.socket.emit('leave-document', { userID: this.props.userID, docID: this.props.currDOC.docID, state: stringState }, ({ room, state }) => {
       this.props.leaveDoc();
+      console.log('hello darkness my old friend')
     });
   }
 
   render() {
     return (<div id='content'>
       <div style={{'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between'}}>
-        <TextField hintText={'Untitled'}
+        <TextField hintText={this.props.title ? this.props.title : 'Untitled'}
                   underlineShow={false}
                   style={{'fontSize': '20px'}}
-                  hintStyle={{'fontStyle': 'italic'}}/>
+                  hintStyle={{'fontStyle': 'italic'}}
+                  onChange={()=>console.log('changed!')}          
+        />
+        
         <div>
           <RaisedButton
             label="Share"
@@ -156,3 +154,18 @@ export default class TextEditor extends React.Component {
     </div>);
   }
 }
+
+TextEditor.propTypes = {
+  joinDoc: PropTypes.func,
+};
+
+
+const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket }) => ({
+  currDOC, room, loggedIn, userID, socket
+});
+
+const mapStateToDispatch = dispatch => ({
+  // joinDoc: (room, state, docID) => dispatch({ type: 'JOIN_DOC', room, state, docID }),
+});
+
+export default connect(mapStateToProps, mapStateToDispatch)(TextEditor);

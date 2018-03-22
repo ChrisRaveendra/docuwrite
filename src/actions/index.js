@@ -1,8 +1,7 @@
-export function handleEditor(editorState, selectionState) {
+export function handleEditor(editorState) {
     return {
         type: 'UPDATE_EDITOR_STATE',
         editor: editorState,
-        selection: selectionState,
     }
 }
 
