@@ -1,11 +1,13 @@
 import express from 'express';
 // uses cookie parser or smtg similar internally
 import session from 'express-session';
+import md5 from 'md5';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { User, Document } from './models/models';
+
 // TODO
 // import compression from 'compression';
 
@@ -14,7 +16,7 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 
 const auth = require('./routes/auth');
-const routes = require('./routes/index');
+const routes = require('./routes/routes');
 const MongoStore = require('connect-mongo')(session);
 
 app.use(bodyParser.json());
@@ -57,13 +59,13 @@ io.use((socket, next) => {
 });
 // Passport Serialize
 passport.serializeUser((user, done) => {
-  console.log('serializing user: ', user);
+  // console.log('serializing user: ', user);
   done(null, user._id);
 });
 
 // Passport Deserialize
 passport.deserializeUser((id, done) => User.findById(id, (err, user) => {
-  console.log('deserializing user: ', user);
+  // console.log('deserializing user: ', user);
   done(err, user);
 }));
 
@@ -72,7 +74,7 @@ passport.use(new LocalStrategy((email, password, done) => {
   User.findOne({ email }).exec()
   .then((user) => {
     if (!user) {
-      console.log(user);
+      console.log('no user in passport local strategy ', user);
       return done(null, false, { message: 'Incorrect username' });
     }
 
@@ -91,39 +93,50 @@ app.use('/', auth.authRouter(passport));
 app.use('/', routes);
 
 
-
+const sharedDocs = {};
 io.on('connection', (socket) => {
-  console.log('\n\n\n', socket.request.session);
-  console.log('\n\n\n', socket.handshake);
-  // console.log()
-  // console.log('\n\n\n\n', socket.request.session.passport);
-  // console.log('\n\n\n', socket.request.user);
-  // console.log('\n\n\nsocket.request: ', socket.request);
-  /*
-  connect
-  message
-  disconnect
-  reconnect
-  ping
-  join
-  leave
-  */
-  // emitted by frontend after post request
-  socket.on('load', (docID) => {
-    Document.findByID(docID).exec()
-    .catch(err => res.status(500).json({
-      success: false,
-      error: err,
-    }))
-    .then((doc) => res.status(200).json({
-      success: true,
-      title: doc.title,
-      text: doc.text
-    }));
+  socket.on('join-document', (docAuth, ackCB) => {
+    Document.findById(docAuth.docID).exec()
+    .then((doc) => {
+      // TODO make sure user is allowed to access this
+      if (!doc) {
+        ackCB({ error: 'no document found' })
+      } else if (doc.owners.indexOf(docAuth.userID) < 0) {
+        ackCB({ error: 'you don\'t have permission to see this document!' })
+      } else {
+        let secretToken = sharedDocs[docAuth.docID];
+        if (!secretToken) {
+          secretToken = sharedDocs[docAuth.docID] = md5(docAuth.docID + Math.random() + 'miao');
+        }
+        ackCB({ room: secretToken, state: doc.state })
+        socket.join(secretToken);
+      }
+    })
+    .catch((error) => {
+      console.log('error in finding document ', error);
+      ackCB({ error })
+    })
+  });
 
-  })
+  socket.on('update-document', (docAuth, ackCB) => {
+    Document.findByIdAndUpdate(docAuth.docID, { state: docAuth.state }).exec()
+    .then((doc) => {
+      if (!doc) {
+        ackCB({ error: 'no document found' })
+      } else {
+        ackCB({ success: true });
+        socket.to(sharedDocs[doc.id]).emit('updated-doc', { state: doc.state })
+      }
+    })
+    .catch((error)=> {
+      console.log('Error from update-document', error);
+      ackCB({ error })
+    })
+  });
+
+
   socket.on('disconnect', () => {
-    console.log('A user disconnected');
+    console.log('A user disconnected at ', new Date().toLocaleString());
   });
 });
 

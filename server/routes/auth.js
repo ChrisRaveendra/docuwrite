@@ -35,7 +35,8 @@ module.exports = {
             message: 'Signup did not save user',
           });
         }
-        console.log(user);
+        console.log('session: ', req.session);
+        console.log('user : ', req.user);
         return res.status(200).json({
           success: true,
           userID: user._id,
@@ -47,9 +48,7 @@ module.exports = {
     router.post('/login', (req, res, next) => {
       req.body.username = req.body.email;
       next();
-    }, passport.authenticate('local'), (req, res, next) => {
-      // TODO return some object for axios
-      console.log(req.user);
+    }, passport.authenticate('local'), (req, res) => {
       res.json({
         success: true,
         userID: req.user._id,
@@ -57,7 +56,7 @@ module.exports = {
       });
     });
 
-    router.get('/logout', (req, res, next) => {
+    router.get('/logout', (req, res) => {
       req.logout();
       res.status(200).json({
         success: true,

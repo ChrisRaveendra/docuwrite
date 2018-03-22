@@ -1,62 +1,55 @@
-import React from 'react';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import Textbar from './Toolbar';
-import TextEditor from './TextEditor';
-import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
-import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import Toggle from 'material-ui/Toggle'
+ import React from 'react';
+ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+ import Textbar from './Toolbar';
+ import TextEditor from './TextEditor';
+ import Login from './Login';
+ import Home from './Home';
+ import Document from './Document';
+ // import io from 'socket-io-client';
+ // const socket = null;
+
+// react-redux - the bindings, the connections
+ import { Provider, connect } from 'react-redux';
+// the difference is that redux is the idea of having a store,
+//    a reducer, and actions
+ import { createStore } from 'redux';
+
+ import { handleEditor } from '../actions/index';
+// /* reducer - a function; */
+// const store = createStore((state = { loggedIn: null }, action) => {
+//   switch(action.type) {
+//     case 'USER_LOGIN':
+//       return Object.assign({}, state, { loggedIn: action.data });
+//   }
+//   return state;
+// }/*middleware would go here , default initial state*/);
 
 
+ const inlineStyle = () => ({
+   border: 'solid black',
+   display: 'flex',
+   flex: '1',
+   flexDirection: 'column',
+   alignItems: 'center',
+   justifyContent: 'center',
+ });
 
-import {connect} from 'react-redux';
-import {handleEditor, handleThemeChange} from '../actions/index';
+ let App = ({ updateEditor, /* updateSelection */ editorState, selectionState, loggedIn, socket, room, currDOC }) =>
+ (<MuiThemeProvider>
+   {!loggedIn ? (<Login />) :
+     (room && currDOC ? (<Document />) : (<Home />))
+   }
+ </MuiThemeProvider>);
 
-const inlineStyle = () => ({
-  // 'width': '1000px',
-  // 'height': '500px',
-  // 'display': 'flex',
-  // 'flex': '1',
-  // 'flexDirection': 'column',
-  // 'alignItems': 'center',
-  // 'justifyContent': 'center',
-  'overflow': 'visible',
-  'height': 'calc(100vh - 160px)',
+ const mapStateToProps = ({ editorState, selectionState, socket, room, currDOC, loggedIn}) => ({
+   editorState, selectionState, socket, room, currDOC, loggedIn });
 
-});
+ const mapDispatchToProps = dispatch => ({
+   updateEditor: (editorState, selectionState) => {
+     dispatch(handleEditor(editorState, selectionState));
+   },
+ });
 
-let App = ({ updateEditor, editorState, selectionState, isDarkTheme, changeTheme }) => {
+ App = connect(mapStateToProps, mapDispatchToProps)(App);
 
-  return (<MuiThemeProvider muiTheme={getMuiTheme(!isDarkTheme ? lightBaseTheme : darkBaseTheme)}>
-    <div>
-      <Toggle onToggle={() => changeTheme(isDarkTheme)}/>
-      {/* <Textbar
-        updateEditor={updateEditor}
-        editorState={editorState}
-      /> */}
-      <div style={inlineStyle()}>
-        <TextEditor
-          updateEditor={updateEditor}
-          // updateSelection={(selectionState) => updateSelection(selectionState)}
-          editorState={editorState}
-          selectionState={selectionState}
-        />
-      </div>
-    </div>
-  </MuiThemeProvider>);
-}
-
-const mapStateToProps = ({ editorState, selectionState, isDarkTheme }) => ({ editorState, selectionState, isDarkTheme });
-
-const mapDispatchToProps = (dispatch) => ({
-  updateEditor: (editorState, selectionState) => {
-    dispatch(handleEditor(editorState, selectionState));
-  },
-  changeTheme: (isDarkTheme) => {
-    dispatch(handleThemeChange(isDarkTheme))
-  }
-});
-
-App = connect(mapStateToProps, mapDispatchToProps)(App);
-
-export default App;
+ export default App;

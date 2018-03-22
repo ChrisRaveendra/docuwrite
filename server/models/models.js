@@ -15,16 +15,28 @@ const userSchema = mongoose.Schema({
 });
 
 const docSchema = mongoose.Schema({
-  title: String,
+  title: {
+    type: String,
+    default: 'Untitled',
+  },
+  ownedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   owners: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   }],
-  text: {
+  state: {
     type: String,
     default: ''
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  }
 });
 
 module.exports = {
