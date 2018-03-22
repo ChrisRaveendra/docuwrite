@@ -4,7 +4,8 @@ import { debug } from 'util';
 const defaultState = {
   editorState: EditorState.createEmpty(),
   selectionState: SelectionState.createEmpty(),
-  loggedIn: null
+  loggedIn: null,
+  isDarkTheme: false
 };
 
 // defaultState.selectionState = defaultState.editorState.getSelection();
@@ -19,11 +20,16 @@ const reducer = (state = defaultState, action) => {
           editorState: action.editor,
           selectionState: action.selection
         };
+    case 'UPDATE_THEME':
+        return {
+          ...state,
+          isDarkTheme: !action.isDarkTheme,
+        }
     case 'USER_LOGIN':
-      return {
-        ...state,
-        loggedIn: action.data,
-      }
+        return {
+          ...state,
+          loggedIn: action.data,
+        }
     default:
         return state;
   }

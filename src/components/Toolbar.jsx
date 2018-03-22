@@ -8,6 +8,8 @@ import DropDownMenu from 'material-ui/DropDownMenu';
 import RaisedButton from 'material-ui/RaisedButton';
 import { Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
 import FlatButton from 'material-ui/FlatButton';
+import Toggle from 'material-ui/Toggle'
+
 
 import FormatBold from 'material-ui/svg-icons/editor/format-bold'
 import FormatItalic from 'material-ui/svg-icons/editor/format-italic'
@@ -73,7 +75,6 @@ export default class Textbar extends React.Component {
         'top': '0px'
       }}>
         <Toolbar title="My Toolbar" style={{'display':'flex', 'alignItems': 'center'}}>
-
           <FormatBold onMouseDown={this.toggleBold}
                       color={styles.includes("CUSTOM_FONT_WEIGHT_bold") ? 'black' : 'white'}
                     />

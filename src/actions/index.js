@@ -5,3 +5,10 @@ export function handleEditor(editorState, selectionState) {
         selection: selectionState,
     }
 }
+
+export function handleThemeChange(isDarkTheme) {
+    return {
+        type: 'UPDATE_THEME',
+        isDarkTheme: isDarkTheme
+    }
+}

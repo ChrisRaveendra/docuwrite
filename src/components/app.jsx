@@ -2,9 +2,15 @@ import React from 'react';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import Textbar from './Toolbar';
 import TextEditor from './TextEditor';
+import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
+import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import Toggle from 'material-ui/Toggle'
+
+
 
 import {connect} from 'react-redux';
-import {handleEditor} from '../actions/index';
+import {handleEditor, handleThemeChange} from '../actions/index';
 
 const inlineStyle = () => ({
   // 'width': '1000px',
@@ -19,10 +25,11 @@ const inlineStyle = () => ({
 
 });
 
-let App = ({ updateEditor, /*updateSelection*/ editorState, selectionState}) => {
+let App = ({ updateEditor, editorState, selectionState, isDarkTheme, changeTheme }) => {
 
-  return (<MuiThemeProvider>
+  return (<MuiThemeProvider muiTheme={getMuiTheme(!isDarkTheme ? lightBaseTheme : darkBaseTheme)}>
     <div>
+      <Toggle onToggle={() => changeTheme(isDarkTheme)}/>
       {/* <Textbar
         updateEditor={updateEditor}
         editorState={editorState}
@@ -39,12 +46,15 @@ let App = ({ updateEditor, /*updateSelection*/ editorState, selectionState}) => 
   </MuiThemeProvider>);
 }
 
-const mapStateToProps = ({ editorState, selectionState }) => ({ editorState, selectionState });
+const mapStateToProps = ({ editorState, selectionState, isDarkTheme }) => ({ editorState, selectionState, isDarkTheme });
 
 const mapDispatchToProps = (dispatch) => ({
   updateEditor: (editorState, selectionState) => {
     dispatch(handleEditor(editorState, selectionState));
   },
+  changeTheme: (isDarkTheme) => {
+    dispatch(handleThemeChange(isDarkTheme))
+  }
 });
 
 App = connect(mapStateToProps, mapDispatchToProps)(App);
