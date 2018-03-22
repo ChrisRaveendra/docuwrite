@@ -34,14 +34,14 @@ class Login extends React.Component {
       username: this.state.username,
       password: this.state.password,
     })
-    .then(({ data }) => this.props.changeStateTo(data))
+    .then(({ data }) => this.props.changeStateTo(data) )
     .catch(err => console.log(err));
   }
 
   render() {
     return (
       <div>
-        <pre>{JSON.stringify(this.props.myRenamedState)}</pre>
+        {/* <pre>{JSON.stringify(this.props.user)}</pre> */}
         <Paper >
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '30px' }}>
             <TextField
@@ -94,8 +94,8 @@ class Login extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => ({
-  myRenamedState: state.loggedIn
+const mapStateToProps = ({ socket }) => ({
+  socket
 });
 
 const mapStateToDispatch = (dispatch) => ({
@@ -123,7 +123,7 @@ export default connect( mapStateToProps, mapStateToDispatch )(Login)
 //       }
 //
 //       render() {
-//         return <component myRenamedState=/>
+//         return <component user=/>
 //       }
 //     }
 //   }

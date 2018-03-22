@@ -1,16 +1,19 @@
  import React from 'react';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import Textbar from './Toolbar';
-import TextEditor from './TextEditor';
-import Login from './Login';
-import Home from './Home';
+ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+ import Textbar from './Toolbar';
+ import TextEditor from './TextEditor';
+ import Login from './Login';
+ import Home from './Home';
+ // import io from 'socket-io-client';
+ // const socket = null;
+
 // react-redux - the bindings, the connections
-import { Provider, connect } from 'react-redux';
+ import { Provider, connect } from 'react-redux';
 // the difference is that redux is the idea of having a store,
 //    a reducer, and actions
-import { createStore } from 'redux';
+ import { createStore } from 'redux';
 
-import {handleEditor} from '../actions/index';
+ import { handleEditor } from '../actions/index';
 // /* reducer - a function; */
 // const store = createStore((state = { loggedIn: null }, action) => {
 //   switch(action.type) {
@@ -21,42 +24,44 @@ import {handleEditor} from '../actions/index';
 // }/*middleware would go here , default initial state*/);
 
 
-const inlineStyle = () => ({
-  'border': 'solid black',
-  'display': 'flex',
-  'flex': '1',
-  'flexDirection': 'column',
-  'alignItems': 'center',
-  'justifyContent': 'center',
-});
+ const inlineStyle = () => ({
+   border: 'solid black',
+   display: 'flex',
+   flex: '1',
+   flexDirection: 'column',
+   alignItems: 'center',
+   justifyContent: 'center',
+ });
 
-let App = ({ updateEditor, /*updateSelection*/ editorState, selectionState, loggedIn}) => {
-  return (<MuiThemeProvider>
-    {!loggedIn ? (<Login />) :
-      (<div>
-        <Textbar/>
-        <div style={inlineStyle()}>
-          <TextEditor
-            updateEditor={updateEditor}
-            // updateSelection={(selectionState) => updateSelection(selectionState)}
-            editorState={editorState}
-            selectionState={selectionState}
-          />
-        </div>
-      </div>)
-    }
+ let App = ({ updateEditor, /* updateSelection */ editorState, selectionState, loggedIn, socket, room, currDOC }) => (<MuiThemeProvider>
+   {!loggedIn ? (<Login />) : (<Home />)
+    //  (room && currDOC ?
+    //    (<div>
+    //          <Textbar/>
+    //          <div style={inlineStyle()}>
+    //            <TextEditor
+    //              updateEditor={updateEditor}
+    //              // updateSelection={(selectionState) => updateSelection(selectionState)}
+    //              editorState={editorState}
+    //              selectionState={selectionState}
+    //            />
+    //          </div>
+    //        </div>)
+    //        : (<Home />)
+    // )
+  }
 
-  </MuiThemeProvider>);
-}
+ </MuiThemeProvider>);
 
-const mapStateToProps = ({ editorState, selectionState, loggedIn }) => ({ editorState, selectionState, loggedIn});
+ const mapStateToProps = ({ editorState, selectionState, socket, room, currDOC, loggedIn}) => ({
+   editorState, selectionState, socket, room, currDOC, loggedIn });
 
-const mapDispatchToProps = (dispatch) => ({
-  updateEditor: (editorState, selectionState) => {
-    dispatch(handleEditor(editorState, selectionState));
-  },
-});
+ const mapDispatchToProps = dispatch => ({
+   updateEditor: (editorState, selectionState) => {
+     dispatch(handleEditor(editorState, selectionState));
+   },
+ });
 
-App = connect(mapStateToProps, mapDispatchToProps)(App);
+ App = connect(mapStateToProps, mapDispatchToProps)(App);
 
-export default App;
+ export default App;
