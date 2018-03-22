@@ -96,6 +96,7 @@ app.use('/', routes);
 const sharedDocs = {};
 io.on('connection', (socket) => {
   socket.on('join-document', (docAuth, ackCB) => {
+
     Document.findById(docAuth.docID).exec()
     .then((doc) => {
       if (!doc) {
@@ -139,11 +140,32 @@ io.on('connection', (socket) => {
     })
   });
 
+  socket.on('delete-document', (docAuth, ackCB) => {
+    const { docIDs, userID } = docAuth;
+    let errors = {};
+    let success = {};
+    Document.find({
+        _id: { $in: [...docIDs.map(docID => mongoose.Types.ObjectId(docID))] },
+        ownedBy: { $in: [mongoose.Types.ObjectId(userID)] }
+      })
+      .exec()
+      .then(foundDocs =>
+        Promise.all(foundDocs.filter(doc => !io.nsps['/'].adapter.rooms[sharedDocs[doc._id]] || io.nsps['/'].adapter.rooms[sharedDocs[doc._id]].length === 0)
+               .map(doc => doc.remove().then((removed) => { success[doc._id] = !!removed; }))
+      ))
+      .then(() => ackCB({ success, errors }))
+      .catch((err) => {
+        errors.mongoDB = err;
+        ackCB({ success, errors });
+      })
+  });
+
   socket.on('leave-document', (docAuth, ackCB) => {
     // TODO assuming no auto-Save
     socket.leave(sharedDocs[docAuth.docID]);
     // TODO
-  })
+  });
+
   socket.on('disconnect', () => {
     console.log('A user disconnected at', new Date().toLocaleString());
   });
