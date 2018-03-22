@@ -1,10 +1,10 @@
 import React from 'react';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import Toolbar from './Toolbar';
+import Textbar from './Toolbar';
 import TextEditor from './TextEditor';
 
 import {connect} from 'react-redux';
-//import {handleFormat} from '../actions/index';
+import {handleEditor} from '../actions/index';
 
 const inlineStyle = () => ({
   // 'width': '1000px',
@@ -15,33 +15,30 @@ const inlineStyle = () => ({
   'flexDirection': 'column',
   'alignItems': 'center',
   'justifyContent': 'center',
-  // 'backgroundColor': input.guessed ? 'red' : 'yellow'
 });
 
-let App = ({ updateEditor, editorState }) => {
+let App = ({ updateEditor, /*updateSelection*/ editorState, selectionState}) => {
   return (<MuiThemeProvider>
     <div>
-      <Toolbar/>
+      <Textbar/>
       <div style={inlineStyle()}>
         <TextEditor
-          updateEditor={(editorState) => updateEditor(editorState)}
+          updateEditor={updateEditor}
+          // updateSelection={(selectionState) => updateSelection(selectionState)}
           editorState={editorState}
+          selectionState={selectionState}
         />
       </div>
     </div>
   </MuiThemeProvider>);
 }
 
-const mapStateToProps = ({ editorState }) => ({ editorState });
+const mapStateToProps = ({ editorState, selectionState }) => ({ editorState, selectionState});
 
 const mapDispatchToProps = (dispatch) => ({
-  updateEditor: (editorState) => {
-    //debugger;
-    dispatch({
-      type: 'UPDATE_EDITOR_STATE',
-      content: editorState,
-    })
-  }
+  updateEditor: (editorState, selectionState) => {
+    dispatch(handleEditor(editorState, selectionState));
+  },
 });
 
 App = connect(mapStateToProps, mapDispatchToProps)(App);
