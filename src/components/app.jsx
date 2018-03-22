@@ -34,6 +34,7 @@
 
  let App = ({ updateEditor, /* updateSelection */ editorState, selectionState, loggedIn, socket, room, currDOC }) =>
  (<MuiThemeProvider>
+   {/* <Document /> */}
    {!loggedIn ? (<Login />) :
      (room && currDOC ? (<Document />) : (<Home />))
    }

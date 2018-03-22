@@ -96,68 +96,86 @@ app.use('/', routes);
 const sharedDocs = {};
 io.on('connection', (socket) => {
   socket.on('join-document', (docAuth, ackCB) => {
-
     Document.findById(docAuth.docID).exec()
     .then((doc) => {
       if (!doc) {
-        ackCB({ error: 'no document found' })
+        ackCB({ error: 'no document found' });
       } else if (doc.owners.indexOf(docAuth.userID) < 0) {
-        ackCB({ error: 'you don\'t have permission to see this document!' })
+        ackCB({ error: 'you don\'t have permission to see this document!' });
       } else {
         let secretToken = sharedDocs[docAuth.docID];
         if (!secretToken) {
-          secretToken = sharedDocs[docAuth.docID] = md5(docAuth.docID + Math.random() + 'miao');
+          secretToken = sharedDocs[docAuth.docID] = md5(`${docAuth.docID + Math.random()}miao`);
         }
-        ackCB({ room: secretToken, state: doc.state })
+        ackCB({ room: secretToken, state: doc.state });
         socket.join(secretToken);
       }
     })
     .catch((error) => {
       console.log('error in finding document ', error);
-      ackCB({ error })
-    })
+      ackCB({ error });
+    });
   });
 
   socket.on('share-document', (docAuth, ackCB) => {
     const { docIDs, userIDs } = docAuth;
     console.log('docIDs, ', docIDs);
     console.log('userIDs, ', userIDs);
-  })
+  });
 
   socket.on('update-document', (docAuth, ackCB) => {
+    console.log('cur STATE:     \n', docAuth.state);
     Document.findByIdAndUpdate(docAuth.docID, { state: docAuth.state }).exec()
     .then((doc) => {
       if (!doc) {
-        ackCB({ error: 'no document found' })
+        ackCB({ error: 'no document found' });
       } else {
         ackCB({ success: true });
-        socket.to(sharedDocs[doc.id]).emit('updated-doc', { state: doc.state })
+        console.log('acking, sending state: ', doc.state);
+        socket.to(sharedDocs[doc.id]).emit('updated-doc', { state: doc.state });
       }
     })
     .catch((error) => {
       console.log('Error from update-document', error);
-      ackCB({ error })
-    })
+      ackCB({ error });
+    });
+  });
+
+  socket.on('leave-document', (docAuth, ackCB) => {
+    console.log(docAuth);
+    Document.findByIdAndUpdate(docAuth.docID, { state: docAuth.state }).exec()
+        .then((doc) => {
+          if (!doc) {
+            ackCB({ error: 'no document found' });
+          } else {
+            ackCB({ success: true });
+            socket.to(sharedDocs[doc.id]).emit('updated-doc', { state: doc.state })
+          }
+        })
+        .catch((error) => {
+          console.log('Error from leave-document', error);
+          ackCB({ error });
+        });
   });
 
   socket.on('delete-document', (docAuth, ackCB) => {
     const { docIDs, userID } = docAuth;
-    let errors = {};
-    let success = {};
+    const errors = {};
+    const success = {};
     Document.find({
-        _id: { $in: [...docIDs.map(docID => mongoose.Types.ObjectId(docID))] },
-        ownedBy: { $in: [mongoose.Types.ObjectId(userID)] }
-      })
-      .exec()
-      .then(foundDocs =>
-        Promise.all(foundDocs.filter(doc => !io.nsps['/'].adapter.rooms[sharedDocs[doc._id]] || io.nsps['/'].adapter.rooms[sharedDocs[doc._id]].length === 0)
-               .map(doc => doc.remove().then((removed) => { success[doc._id] = !!removed; }))
-      ))
-      .then(() => ackCB({ success, errors }))
-      .catch((err) => {
-        errors.mongoDB = err;
-        ackCB({ success, errors });
-      })
+      _id: { $in: [...docIDs.map(docID => mongoose.Types.ObjectId(docID))] },
+      ownedBy: { $in: [mongoose.Types.ObjectId(userID)] },
+    })
+    .exec()
+    .then(foundDocs =>
+      Promise.all(foundDocs.filter(doc => !io.nsps['/'].adapter.rooms[sharedDocs[doc._id]] || io.nsps['/'].adapter.rooms[sharedDocs[doc._id]].length === 0)
+             .map(doc => doc.remove().then((removed) => { success[doc._id] = !!removed; })),
+    ))
+    .then(() => ackCB({ success, errors }))
+    .catch((err) => {
+      errors.mongoDB = err;
+      ackCB({ success, errors });
+    });
   });
 
 

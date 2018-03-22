@@ -110,6 +110,7 @@ class Home extends React.Component {
       minute: '2-digit',
       second: '2-digit',
     };
+    
     const amISelected = (index) => {
       if (typeof this.state.selected === 'string') {
         return this.state.selected === 'all';

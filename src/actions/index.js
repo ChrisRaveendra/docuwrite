@@ -12,3 +12,16 @@ export function handleThemeChange(isDarkTheme) {
         isDarkTheme: isDarkTheme
     }
 }
+
+export function handleExit() {
+    return {
+        type: 'LEAVE_DOC',
+    }
+}
+
+export function handleUpdate(state) {
+  return {
+    type: 'UPDATE_DOC',
+    state,
+  }
+}

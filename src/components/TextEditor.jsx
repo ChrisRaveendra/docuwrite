@@ -6,9 +6,12 @@ import {OrderedSet} from 'immutable';
 import Paper from 'material-ui/Paper';
 import Textbar from './Toolbar';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
+import TextField from 'material-ui/TextField';
 import createStyles from 'draft-js-custom-styles';
 import {getDefaultKeyBinding, KeyBindingUtil} from 'draft-js';
 const {hasCommandModifier} = KeyBindingUtil;
+import RaisedButton from 'material-ui/RaisedButton';
+import Home from 'material-ui/svg-icons/action/Home'
 
 const customStyleMap = {
   MARK: {
@@ -23,11 +26,9 @@ const myKeyBindingFn = (e: SyntheticKeyboardEvent): string => {
     return 'bold';
   }
   if (e.keyCode === 73 /* `b` key */ && hasCommandModifier(e)) {
-    console.log('i hit')
     return 'italic';
   }
   if (e.keyCode === 85 /* `b` key */ && hasCommandModifier(e)) {
-    console.log('u hit')
     return 'underline';
   }
   return getDefaultKeyBinding(e);
@@ -51,9 +52,16 @@ export default class TextEditor extends React.Component {
   //  Tab exits the editor
   //  does show a selection state for bold/italic button click
   handleEditorChange = (editorState) => {
+    console.log(editorState.getCurrentContent().getBlockMap());
     this.props.updateEditor(editorState);
   }
 
+  componentWillReceiveProps() {
+    this.props.socket.on('updated-doc', ({state} )=> {
+      console.log(state);
+      this.props.handleUpdate(state)
+    });
+  }
   handleKeyCommand = (command: string): DraftHandleValue => {
     if (command === 'bold') {
       const newEditorState = styles.fontWeight.toggle(this.props.editorState, 'bold');
@@ -70,12 +78,66 @@ export default class TextEditor extends React.Component {
     return 'not-handled';
   }
 
+  saveDoc() {
+    let stringState = convertToRaw(this.props.editorState.getCurrentContent());
+
+    stringState = JSON.stringify(stringState);
+    console.log(stringState);
+    this.props.socket.emit('update-document', { userID: this.props.userID, docID: this.props.currDOC.docID, state: stringState}, ({ room, state }) => {
+      console.log('reached!')
+      console.log(room, state)
+
+      if (room) {
+        console.log('reached2!')
+        this.props.joinDoc(room, state, { docID: this.state.documents[rowNum]._id });
+      }
+    });
+  }
+
+  //Move up from Doc to User home page
+  leaveDoc() {
+    let stringState = convertToRaw(this.props.editorState.getCurrentContent());
+    stringState = JSON.stringify(stringState);
+    this.props.socket.emit('leave-document', { userID: this.props.userID, docID: this.props.currDOC.docID, state: stringState }, ({ room, state }) => {
+      this.props.leaveDoc();
+    });
+  }
 
   render() {
     return (<div id='content'>
-      <h1>Welcome to doCuwRitE</h1>
-
-      <Paper zDepth={2}>
+      <div style={{'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between'}}>
+        <TextField hintText={'Untitled'}
+                  underlineShow={false}
+                  style={{'fontSize': '20px'}}
+                  hintStyle={{'fontStyle': 'italic'}}/>
+        <div>
+          <RaisedButton
+            label="Share"
+            onClick={(e) => {
+              e.preventDefault();
+              console.log('CurrDoc: ', this.props.currDOC)
+              console.log(`Current doc ID: ${this.props.currDOC.docID}`);
+              alert(`Share this code to provide access to your document: ${this.props.currDOC.docID}`)
+            }}
+          />
+          <RaisedButton label="Save"
+            primary={true}
+            onClick={(e) => {
+              e.preventDefault();
+              this.saveDoc();
+            }}
+          />
+          <RaisedButton
+            backgroundColor="#a4c639"
+            icon={<Home />}
+            onClick={(e) => {
+              e.preventDefault();
+              this.leaveDoc();
+            }}
+          />
+        </div>
+      </div>
+      <Paper zDepth={2} transitionEnabled={false}>
             <Textbar
                 updateEditor={this.props.updateEditor}
                 editorState={this.props.editorState}
@@ -83,7 +145,8 @@ export default class TextEditor extends React.Component {
         <Editor className='editor'
                 editorState={this.props.editorState}
                 onChange={this.handleEditorChange}
-                spellCheck={true} ref='editor'
+                spellCheck={true}
+                ref='editor'
                 customStyleFn={customStyleFn}
                 customStyleMap={customStyleMap}
                 handleKeyCommand={this.handleKeyCommand}

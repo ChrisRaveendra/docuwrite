@@ -10,7 +10,7 @@ import Toggle from 'material-ui/Toggle'
 
 
 import {connect} from 'react-redux';
-import {handleEditor, handleThemeChange} from '../actions/index';
+import {handleEditor, handleThemeChange, handleUpdate} from '../actions/index';
 
 const inlineStyle = () => ({
   // 'width': '1000px',
@@ -25,7 +25,7 @@ const inlineStyle = () => ({
 
 });
 
-const Document = ({ updateEditor, editorState, selectionState, isDarkTheme, changeTheme }) => {
+const Document = ({ updateEditor, updateDoc, editorState, selectionState, isDarkTheme, changeTheme }) => {
 
   return (<MuiThemeProvider muiTheme={getMuiTheme(!isDarkTheme ? lightBaseTheme : darkBaseTheme)}>
     <div>
@@ -40,6 +40,7 @@ const Document = ({ updateEditor, editorState, selectionState, isDarkTheme, chan
           // updateSelection={(selectionState) => updateSelection(selectionState)}
           editorState={editorState}
           selectionState={selectionState}
+          handleUpdate={updateDoc}
         />
       </div>
     </div>
@@ -54,7 +55,8 @@ const mapDispatchToProps = (dispatch) => ({
   },
   changeTheme: (isDarkTheme) => {
     dispatch(handleThemeChange(isDarkTheme))
-  }
+  },
+  updateDoc: state => dispatch(handleUpdate(state))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Document);
