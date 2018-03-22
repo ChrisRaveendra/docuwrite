@@ -32,7 +32,6 @@ const reducer = (state = defaultState, action) => {
         socket: io('http://localhost:3000'),
       };
     case 'JOIN_DOC':
-      debugger;    
       return {
         ...state,
         currDOC: action.docID,

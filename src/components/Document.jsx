@@ -25,7 +25,7 @@ const inlineStyle = () => ({
   'height': 'calc(100vh - 160px)',
 });
 
-const Document = ({ updateEditor, editorState, selectionState, isDarkTheme, changeTheme, currDOC, socket, leaveDoc }) => {
+const Document = ({ updateEditor, editorState, isDarkTheme, changeTheme, currDOC, socket, leaveDoc }) => {
 
   return (<MuiThemeProvider muiTheme={getMuiTheme(!isDarkTheme ? lightBaseTheme : darkBaseTheme)}>
     <div>
@@ -37,7 +37,6 @@ const Document = ({ updateEditor, editorState, selectionState, isDarkTheme, chan
           <TextEditor
             updateEditor={updateEditor}
             editorState={editorState}
-            selectionState={selectionState}
             currDOC={currDOC}
             socket={socket}
             leaveDoc={leaveDoc}
@@ -47,11 +46,11 @@ const Document = ({ updateEditor, editorState, selectionState, isDarkTheme, chan
   </MuiThemeProvider>);
 }
 
-const mapStateToProps = ({ editorState, selectionState, isDarkTheme, currDOC, socket }) => ({ editorState, selectionState, isDarkTheme, currDOC, socket });
+const mapStateToProps = ({ editorState, isDarkTheme, currDOC, socket }) => ({ editorState, isDarkTheme, currDOC, socket });
 
 const mapDispatchToProps = (dispatch) => ({
-  updateEditor: (editorState, selectionState) => {
-    dispatch(handleEditor(editorState, selectionState));
+  updateEditor: (editorState) => {
+    dispatch(handleEditor(editorState));
   },
   changeTheme: (isDarkTheme) => {
     dispatch(handleThemeChange(isDarkTheme))
