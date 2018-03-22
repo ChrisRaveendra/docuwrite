@@ -119,6 +119,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('update-document', (docAuth, ackCB) => {
+    console.log('cur STATE:     \n',docAuth.state);
     Document.findByIdAndUpdate(docAuth.docID, { state: docAuth.state }).exec()
     .then((doc) => {
       if (!doc) {
@@ -131,7 +132,23 @@ io.on('connection', (socket) => {
     .catch((error)=> {
       console.log('Error from update-document', error);
       ackCB({ error })
-    })
+    });
+  });
+
+    socket.on('leave-document', (docAuth, ackCB) => {
+      Document.findById(docAuth.docID, { state: docAuth.state }).exec()
+        .then((doc) => {
+          if (!doc) {
+            ackCB({ error: 'no document found' })
+          } else {
+            ackCB({ success: true });
+            // socket.to(sharedDocs[doc.id]).emit('updated-doc', { state: doc.state })
+          }
+        })
+        .catch((error) => {
+          console.log('Error from leave-document', error);
+          ackCB({ error })
+        })
   });
 
 

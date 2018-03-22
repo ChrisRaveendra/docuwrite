@@ -10,6 +10,8 @@ import TextField from 'material-ui/TextField';
 import createStyles from 'draft-js-custom-styles';
 import {getDefaultKeyBinding, KeyBindingUtil} from 'draft-js';
 const {hasCommandModifier} = KeyBindingUtil;
+import RaisedButton from 'material-ui/RaisedButton';
+import Home from 'material-ui/svg-icons/action/Home'
 
 const customStyleMap = {
   MARK: {
@@ -70,15 +72,62 @@ export default class TextEditor extends React.Component {
     return 'not-handled';
   }
 
+  saveDoc() {
+    let stringState = convertToRaw(this.props.editorState.getCurrentContent());
+
+    stringState = JSON.stringify(stringState);
+    console.log(stringState);
+    this.props.socket.emit('update-document', { userID: this.props.userID, docID: this.props.currDOC.docID, state: stringState}, ({ room, state }) => {
+      console.log('reached!')
+      console.log(room, state)
+
+      if (room) {
+        console.log('reached2!')
+        this.props.joinDoc(room, state, { docID: this.state.documents[rowNum]._id });
+      }
+    });
+  }
+
+  //Move up from Doc to User home page
+  leaveDoc() {
+    this.props.socket.emit('leave-document', { userID: this.props.userID, docID: this.props.currDOC.docID }, ({ room, state }) => { 
+      this.props.leaveDoc();
+    });
+  }
 
   render() {
     return (<div id='content'>
-
-      <TextField hintText={'Untitled'}
-                 underlineShow={false}
-                 style={{'fontSize': '20px'}}
-                 hintStyle={{'fontStyle': 'italic'}}/>
-
+      <div style={{'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between'}}>
+        <TextField hintText={'Untitled'}
+                  underlineShow={false}
+                  style={{'fontSize': '20px'}}
+                  hintStyle={{'fontStyle': 'italic'}}/>
+        <div>
+          <RaisedButton
+            label="Share"
+            onClick={(e) => {
+              e.preventDefault();
+              console.log(`Current doc ID: ${this.props.currDOC.docID}`);
+              alert(`Share this code to provide access to your document: ${this.props.currDOC.docID}`)
+            }}
+          />
+          <RaisedButton label="Save" 
+            primary={true} 
+            onClick={(e) => {
+              e.preventDefault();
+              this.saveDoc();
+            }}
+          />
+          <RaisedButton
+            backgroundColor="#a4c639"
+            icon={<Home />}
+            onClick={(e) => {
+              e.preventDefault();
+              this.leaveDoc();
+            }}
+          />
+        </div>
+      </div>
       <Paper zDepth={2} transitionEnabled={false}>
             <Textbar
                 updateEditor={this.props.updateEditor}
@@ -87,7 +136,8 @@ export default class TextEditor extends React.Component {
         <Editor className='editor'
                 editorState={this.props.editorState}
                 onChange={this.handleEditorChange}
-                spellCheck={true} ref='editor'
+                spellCheck={true} 
+                ref='editor'
                 customStyleFn={customStyleFn}
                 customStyleMap={customStyleMap}
                 handleKeyCommand={this.handleKeyCommand}

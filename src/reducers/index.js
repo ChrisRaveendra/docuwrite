@@ -32,12 +32,20 @@ const reducer = (state = defaultState, action) => {
         socket: io('http://localhost:3000'),
       };
     case 'JOIN_DOC':
+      debugger;    
       return {
         ...state,
         currDOC: action.docID,
-        currState: action.state,
+        editorState: action.state ? EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))) : EditorState.createEmpty(),
         room: action.room,
       };
+    case 'LEAVE_DOC': 
+      return {
+      ...state,
+      currDOC: null,
+      currState: null,
+      room: null
+    }
     case 'UPDATE_THEME':
       return {
         ...state,

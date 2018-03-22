@@ -11,7 +11,7 @@ import Paper from 'material-ui/Paper';
 
 
 import {connect} from 'react-redux';
-import {handleEditor, handleThemeChange} from '../actions/index';
+import {handleEditor, handleThemeChange, handleExit} from '../actions/index';
 
 const inlineStyle = () => ({
   // 'width': '1000px',
@@ -25,7 +25,7 @@ const inlineStyle = () => ({
   'height': 'calc(100vh - 160px)',
 });
 
-const Document = ({ updateEditor, editorState, selectionState, isDarkTheme, changeTheme }) => {
+const Document = ({ updateEditor, editorState, selectionState, isDarkTheme, changeTheme, currDOC, socket, leaveDoc }) => {
 
   return (<MuiThemeProvider muiTheme={getMuiTheme(!isDarkTheme ? lightBaseTheme : darkBaseTheme)}>
     <div>
@@ -38,13 +38,16 @@ const Document = ({ updateEditor, editorState, selectionState, isDarkTheme, chan
             updateEditor={updateEditor}
             editorState={editorState}
             selectionState={selectionState}
+            currDOC={currDOC}
+            socket={socket}
+            leaveDoc={leaveDoc}
           />
         </div>
     </div>
   </MuiThemeProvider>);
 }
 
-const mapStateToProps = ({ editorState, selectionState, isDarkTheme }) => ({ editorState, selectionState, isDarkTheme });
+const mapStateToProps = ({ editorState, selectionState, isDarkTheme, currDOC, socket }) => ({ editorState, selectionState, isDarkTheme, currDOC, socket });
 
 const mapDispatchToProps = (dispatch) => ({
   updateEditor: (editorState, selectionState) => {
@@ -52,7 +55,10 @@ const mapDispatchToProps = (dispatch) => ({
   },
   changeTheme: (isDarkTheme) => {
     dispatch(handleThemeChange(isDarkTheme))
-  }
+  },
+  leaveDoc: () => {
+    dispatch(handleExit());
+  },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Document);
