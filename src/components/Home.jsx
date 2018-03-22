@@ -67,9 +67,13 @@ class Home extends React.Component {
     console.log(selected);
   }
 
-  shareDocs() {
+  shareDocs(e) {
+    debugger;
+    e.preventDefault();
     const { selected } = this.state;
     console.log(selected);
+    console.log(this.state.documents.filter((x, index) => selected.indexOf(index) > -1));
+    this.props.socket.emit('share-document', { docIDs: this.state.documents.filter((x, index) => selected.indexOf(index) > -1)})
   }
   openDoc(rowNum, colNum) {
     console.log('in openDoc', rowNum, colNum);
@@ -83,6 +87,16 @@ class Home extends React.Component {
     }
   }
 
+  logOut() {
+    debugger;
+    axios.get('http://localhost:3000/logout')
+    .catch(err => console.log('error in logging out: ', err))
+    .then((data) => {
+      this.props.socket.disconnect();
+      this.props.logout();
+    })
+
+  }
   render() {
     const dateStyles = {
       weekday: 'short',
@@ -122,16 +136,13 @@ class Home extends React.Component {
               <DeleteForeverIcon />
             </IconButton>
             <IconButton
-              onClick={() => this.shareDocs()}
+              onClick={(e) => this.shareDocs(e)}
               disabled={anythingSelected}
               tooltip="share"
               tooltipPosition="bottom-right"
             >
               <SocialShareIcon />
             </IconButton>
-          {/* </ToolbarGroup>
-          <ToolbarSeparator />
-          <ToolbarGroup> */}
             <IconMenu
               anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
               iconButtonElement={
@@ -140,7 +151,10 @@ class Home extends React.Component {
                 </IconButton>}
             >
               <MenuItem primaryText="Hire us" />
-              <MenuItem primaryText="Logout" />
+              <MenuItem
+                onClick={() => this.logOut()}
+                primaryText="Logout"
+              />
             </IconMenu>
           </ToolbarGroup>
         </Toolbar>
@@ -193,6 +207,7 @@ const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket }) => ({
 
 const mapStateToDispatch = dispatch => ({
   joinDoc: (room, state, docID) => dispatch({ type: 'JOIN_DOC', room, state, docID }),
+  logout: () => dispatch({ type: 'LOGOUT' })
 });
 
 export default connect(mapStateToProps, mapStateToDispatch)(Home);

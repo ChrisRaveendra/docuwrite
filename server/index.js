@@ -98,7 +98,6 @@ io.on('connection', (socket) => {
   socket.on('join-document', (docAuth, ackCB) => {
     Document.findById(docAuth.docID).exec()
     .then((doc) => {
-      // TODO make sure user is allowed to access this
       if (!doc) {
         ackCB({ error: 'no document found' })
       } else if (doc.owners.indexOf(docAuth.userID) < 0) {
@@ -118,6 +117,12 @@ io.on('connection', (socket) => {
     })
   });
 
+  socket.on('share-document', (docAuth, ackCB) => {
+    const { docIDs, userIDs } = docAuth;
+    console.log('docIDs, ', docIDs);
+    console.log('userIDs, ', userIDs);
+  })
+
   socket.on('update-document', (docAuth, ackCB) => {
     Document.findByIdAndUpdate(docAuth.docID, { state: docAuth.state }).exec()
     .then((doc) => {
@@ -128,15 +133,19 @@ io.on('connection', (socket) => {
         socket.to(sharedDocs[doc.id]).emit('updated-doc', { state: doc.state })
       }
     })
-    .catch((error)=> {
+    .catch((error) => {
       console.log('Error from update-document', error);
       ackCB({ error })
     })
   });
 
-
+  socket.on('leave-document', (docAuth, ackCB) => {
+    // TODO assuming no auto-Save
+    socket.leave(sharedDocs[docAuth.docID]);
+    // TODO
+  })
   socket.on('disconnect', () => {
-    console.log('A user disconnected at ', new Date().toLocaleString());
+    console.log('A user disconnected at', new Date().toLocaleString());
   });
 });
 

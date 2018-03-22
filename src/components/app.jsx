@@ -1,7 +1,5 @@
  import React from 'react';
  import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
- import Textbar from './Toolbar';
- import TextEditor from './TextEditor';
  import Login from './Login';
  import Home from './Home';
  import Document from './Document';

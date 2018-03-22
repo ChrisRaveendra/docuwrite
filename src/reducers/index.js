@@ -43,6 +43,15 @@ const reducer = (state = defaultState, action) => {
         ...state,
         isDarkTheme: !action.isDarkTheme,
       };
+    case 'LOGOUT':
+      return {
+        ...state,
+        loggedIn: null,
+        currDOC: null,
+        currState: null,
+        room: null,
+        socket: null,
+      }
     default:
       return state;
   }
