@@ -6,6 +6,7 @@ import {OrderedSet} from 'immutable';
 import Paper from 'material-ui/Paper';
 import Textbar from './Toolbar';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
+import TextField from 'material-ui/TextField';
 import createStyles from 'draft-js-custom-styles';
 import {getDefaultKeyBinding, KeyBindingUtil} from 'draft-js';
 const {hasCommandModifier} = KeyBindingUtil;
@@ -23,11 +24,9 @@ const myKeyBindingFn = (e: SyntheticKeyboardEvent): string => {
     return 'bold';
   }
   if (e.keyCode === 73 /* `b` key */ && hasCommandModifier(e)) {
-    console.log('i hit')
     return 'italic';
   }
   if (e.keyCode === 85 /* `b` key */ && hasCommandModifier(e)) {
-    console.log('u hit')
     return 'underline';
   }
   return getDefaultKeyBinding(e);
@@ -51,6 +50,7 @@ export default class TextEditor extends React.Component {
   //  Tab exits the editor
   //  does show a selection state for bold/italic button click
   handleEditorChange = (editorState) => {
+    console.log(editorState.getCurrentContent().getBlockMap());
     this.props.updateEditor(editorState);
   }
 
@@ -73,9 +73,13 @@ export default class TextEditor extends React.Component {
 
   render() {
     return (<div id='content'>
-      <h1>Welcome to doCuwRitE</h1>
 
-      <Paper zDepth={2}>
+      <TextField hintText={'Untitled'}
+                 underlineShow={false}
+                 style={{'fontSize': '20px'}}
+                 hintStyle={{'fontStyle': 'italic'}}/>
+
+      <Paper zDepth={2} transitionEnabled={false}>
             <Textbar
                 updateEditor={this.props.updateEditor}
                 editorState={this.props.editorState}

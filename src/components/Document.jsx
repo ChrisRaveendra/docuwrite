@@ -5,7 +5,8 @@ import TextEditor from './TextEditor';
 import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import Toggle from 'material-ui/Toggle'
+import Toggle from 'material-ui/Toggle';
+import Paper from 'material-ui/Paper';
 
 
 
@@ -22,26 +23,23 @@ const inlineStyle = () => ({
   // 'justifyContent': 'center',
   'overflow': 'visible',
   'height': 'calc(100vh - 160px)',
-
 });
 
 const Document = ({ updateEditor, editorState, selectionState, isDarkTheme, changeTheme }) => {
 
   return (<MuiThemeProvider muiTheme={getMuiTheme(!isDarkTheme ? lightBaseTheme : darkBaseTheme)}>
     <div>
-      <Toggle onToggle={() => changeTheme(isDarkTheme)}/>
-      {/* <Textbar
-        updateEditor={updateEditor}
-        editorState={editorState}
-      /> */}
-      <div style={inlineStyle()}>
-        <TextEditor
-          updateEditor={updateEditor}
-          // updateSelection={(selectionState) => updateSelection(selectionState)}
-          editorState={editorState}
-          selectionState={selectionState}
-        />
-      </div>
+        <Toggle onToggle={() => {
+          changeTheme(isDarkTheme);
+          document.body.style.backgroundColor = !isDarkTheme ? "#3c3b3b" : "#f6f7f9";
+        }}/>
+        <div style={inlineStyle()}>
+          <TextEditor
+            updateEditor={updateEditor}
+            editorState={editorState}
+            selectionState={selectionState}
+          />
+        </div>
     </div>
   </MuiThemeProvider>);
 }
