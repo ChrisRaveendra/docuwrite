@@ -35,6 +35,7 @@ import ExtendedRichUtils from '../utils/ExtendedRichUtils';
 
 import createStyles from 'draft-js-custom-styles';
 import {connect} from 'react-redux';
+import getCurrentlySelectedBlock from '../utils/getCurrentlySelectedBlock';
 
 
 const customStyleMap = {
@@ -77,7 +78,6 @@ export default class Textbar extends React.Component {
   toggleBold = (e) => {
     e.preventDefault();
     const newEditorState = styles.fontWeight.toggle(this.props.editorState, 'bold');
-    console.log(this)
     this.handleEditorChange(newEditorState);
   };
 
@@ -93,24 +93,6 @@ export default class Textbar extends React.Component {
     this.handleEditorChange(newEditorState);
   };
 
-  toggleCenter = (e) => {
-    e.preventDefault();
-    let newEditorState = styles.textAlign.toggle(this.props.editorState, 'center');
-    newEditorState = styles.width.toggle(newEditorState, '100%');
-    newEditorState = styles.display.toggle(newEditorState, 'block');
-
-    // const newEditorState = RichUtils.toggleBlockType(this.props.editorState, 'center');
-    console.log(newEditorState.getCurrentInlineStyle().toJS());
-    this.handleEditorChange(newEditorState);
-  };
-
-  toggleBullet = (e) => {
-    e.preventDefault();
-    const newEditorState = styles.textIndent.toggle(this.props.editorState, '25');
-    console.log(newEditorState.getCurrentInlineStyle().toJS());
-    this.handleEditorChange(newEditorState);
-  };
-
   toggleUl = (e) => {
     e.preventDefault();
     const newEditorState = RichUtils.toggleBlockType(this.props.editorState,"unordered-list-item")
@@ -123,14 +105,7 @@ export default class Textbar extends React.Component {
     this.handleEditorChange(newEditorState);
   }
 
-  // toggleAlignment = (e) => {
-  //   e.preventDefault();
-  //   const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "RIGHT");
-  //   this.handleEditorChange(newEditorState);
-  // }
-
   handleEditorChange = (editorState) => {
-    // debugger;
     this.props.updateEditor(editorState);
   }
 
@@ -142,8 +117,12 @@ export default class Textbar extends React.Component {
   };
 
   render() {
-    let styles = this.props.editorState.getCurrentInlineStyle().toJS();
-    let blockStyle = this.props.editorState.getCurrentContent().getBlockMap().toJS();
+    const styles = this.props.editorState.getCurrentInlineStyle().toJS();
+    const {currentBlock} = getCurrentlySelectedBlock(this.props.editorState);
+  //  console.log(getCurrentlySelectedBlock(this.props.editorState));
+    const textAlign = currentBlock.getData().get("textAlignment") === undefined ?
+                      "LEFT" :
+                      currentBlock.getData().get("textAlignment");
     return (
       <div style={{
         'position': 'sticky',
@@ -161,13 +140,17 @@ export default class Textbar extends React.Component {
           <FormatUnderlined onMouseDown={this.toggleUnderline}
                             color={styles.includes("CUSTOM_TEXT_DECORATION_underline") ? 'black' : 'white'}/>
 
-          <FormatAlignLeft onMouseDown={this.toggleAlignLeft} hoverColor={'black'} color={'white'}/>
+          <FormatAlignLeft onMouseDown={this.toggleAlignLeft}
+                           color={textAlign === 'LEFT' ? 'black' : 'white'}/>
 
-          <FormatAlignCenter onMouseDown={this.toggleAlignCenter} hoverColor={'black'} color={'white'}/>
+          <FormatAlignCenter onMouseDown={this.toggleAlignCenter}
+                             color={textAlign === 'CENTER' ? 'black' : 'white'}/>
 
-          <FormatAlignRight onMouseDown={this.toggleAlignRight} hoverColor={'black'} color={'white'}/>
+          <FormatAlignRight onMouseDown={this.toggleAlignRight}
+                            color={textAlign === 'RIGHT' ? 'black' : 'white'}/>
 
-          <FormatAlignJustify onMouseDown={this.toggleAlignJustify} hoverColor={'black'} color={'white'}/>
+          <FormatAlignJustify onMouseDown={this.toggleAlignJustify}
+                              color={textAlign === 'JUSTIFY' ? 'black' : 'white'}/>
 
           <FormatSize hoverColor={'black'} color={'white'}/>
 
@@ -212,9 +195,9 @@ export default class Textbar extends React.Component {
 
           {/* <FormatColorText hoverColor={'black'} color={'black'}/> */}
 
-          <FormatListBulleted onMouseDown={() => {this.toggleUl; console.log(blockStyle)}} color={'white'}/>
+          <FormatListBulleted onMouseDown={this.toggleUl} hoverColor={'black'} color={'white'}/>
 
-          <FormatListNumbered onMouseDown={this.toggleOl} color={'white'}/>
+          <FormatListNumbered onMouseDown={this.toggleOl} hoverColor={'black'} color={'white'}/>
 
         </Toolbar>
       </div>

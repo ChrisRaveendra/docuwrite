@@ -24,7 +24,6 @@ const blockStyleFn = (contentBlock) => {
   const textAlignStyle = contentBlock.getData().get(ALIGNMENT_DATA_KEY);
   switch (textAlignStyle) {
     case 'RIGHT':
-      console.log('you should set right')
       return `align-right`;
     case 'CENTER':
       return `align-center`;
