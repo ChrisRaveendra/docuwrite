@@ -21,6 +21,8 @@ import {
 import IconMenu from 'material-ui/IconMenu';
 import IconButton from 'material-ui/IconButton';
 import AddContentIcon from 'material-ui/svg-icons/content/add';
+import NewDocIcon from 'material-ui/svg-icons/action/note-add';
+import TextField from 'material-ui/TextField';
 // import FontIcon from 'material-ui/FontIcon';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import SocialShareIcon from 'material-ui/svg-icons/social/share';
@@ -39,7 +41,8 @@ class Home extends React.Component {
     this.state = {
       documents: [],
       selected: [],
-      dialogOpen: false,
+      dialogDeleteOpen: false,
+      dialogShareOpen: false,
     };
   }
 
@@ -65,6 +68,7 @@ class Home extends React.Component {
     .catch(err => console.log(err));
   }
   deleteDocs() {
+    debugger;
     const selectedDocIDs = this.state.documents
                           .filter((x, index) => this.state.selected.indexOf(index) > -1)
                           .map(doc => doc._id);
@@ -72,17 +76,18 @@ class Home extends React.Component {
     { docIDs: selectedDocIDs, userID: this.props.userID},
     ({success, errors}) => {
       let newDocs = this.state.documents.filter((doc) => Object.keys(success).indexOf(doc._id) < 0).map(doc => Object.assign({}, doc));
-      this.setState({ dialogOpen: false, selected: [] , documents: newDocs });
+      this.setState({ dialogDeleteOpen: false, selected: [] , documents: newDocs });
     })
   }
 
   shareDocs(e) {
-    console.log('hello from share');
-    debugger;
     e.preventDefault();
     const { selected } = this.state;
     console.log(this.state.documents.filter((x, index) => selected.indexOf(index) > -1));
-    this.props.socket.emit('share-document', { docIDs: this.state.documents.filter((x, index) => selected.indexOf(index) > -1)})
+    this.props.socket.emit('share-document',
+    { docIDs: this.state.documents.filter((x, index) => selected.indexOf(index) > -1)},
+    (({ success }) => this.setState({dialogShareOpen: false }))
+    )
   }
   openDoc(rowNum, colNum) {
     // console.log('in openDoc', rowNum, colNum);
@@ -121,11 +126,11 @@ class Home extends React.Component {
       }
       return this.state.selected.indexOf(index) > -1;
     };
-    const actions = [
+    const deleteActions = [
       <FlatButton
         label="Cancel"
         primary={true}
-        onClick={(e)=> this.deleteDocs(e)}
+        onClick={(e)=> {e.preventDefault(); this.setState({ dialogDeleteOpen: false, selected: [] }) }}
       />,
       <FlatButton
         label="Delete Forever"
@@ -133,16 +138,47 @@ class Home extends React.Component {
         onClick={(e)=> this.deleteDocs(e)}
       />,
     ];
+    const shareActions = [
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={(e)=> {e.preventDefault(); this.setState({ dialogShareOpen: false, selected: [] }) }}
+      />,
+      <FlatButton
+        label="Share"
+        secondary={true}
+        onClick={(e)=> this.shareDocs(e)}
+      />,
+    ]
     const anythingSelected = this.state.selected.length < 1;
     return (<div>
       <Paper>
         <Dialog
-          actions={actions}
+          actions={deleteActions}
           modal={false}
-          open={this.state.dialogOpen}
-          onRequestClose={(e)=> this.deleteDocs(e)}
+          contentStyle={{width: '40%'}}
+          open={this.state.dialogDeleteOpen}
+          // onRequestClose={(e)=> this.deleteDocs(e)}
         >
           Delete Forever?
+        </Dialog>
+
+        <Dialog
+          actions={shareActions}
+          modal={true}
+          open={this.state.dialogShareOpen}
+          contentStyle={{width: '40%'}}
+          // onRequestClose={(e)=> this.shareDocs(e)}
+        >
+          <TextField
+            hintText="Enter Email"
+          />
+          <IconButton
+            tooltip="add user"
+            tooltipPosition="bottom-right"
+          >
+            <AddContentIcon />
+          </IconButton>
         </Dialog>
 
         <Toolbar>
@@ -153,10 +189,10 @@ class Home extends React.Component {
               tooltip="new document"
               tooltipPosition="bottom-right"
             >
-              <AddContentIcon style={{nativeColor: 'white'}} />
+              <AddContentIcon />
             </IconButton>
             <IconButton
-              onClick={() => this.setState({ dialogOpen: true })}
+              onClick={() => this.setState({ dialogDeleteOpen: true })}
               disabled={anythingSelected}
               tooltip="delete forever"
               tooltipPosition="bottom-right"
@@ -164,7 +200,7 @@ class Home extends React.Component {
               <DeleteForeverIcon />
             </IconButton>
             <IconButton
-              onClick={(e) => this.shareDocs(e)}
+              onClick={() => this.setState({ dialogShareOpen: true })}
               disabled={anythingSelected}
               tooltip="share"
               tooltipPosition="bottom-right"
