@@ -80,7 +80,7 @@ class TextEditor extends React.Component {
   //  Tab exits the editor
   //  does show a selection state for bold/italic button click
   handleEditorChange = (editorState) => {
-<<<<<<< HEAD
+
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
     console.log('before save\n', stringState);
@@ -89,10 +89,6 @@ class TextEditor extends React.Component {
     ({ success }) => {
       console.log('success?!', success);
     });
-    // console.log(editorState.getCurrentContent().getBlockMap());
-=======
-  //  console.log(this.props.editorState.toJS());
->>>>>>> 3cb436167dee09ffd0deaf8f7d46cd4eef40af1c
     this.props.updateEditor(editorState);
   }
 
@@ -159,8 +155,6 @@ class TextEditor extends React.Component {
             label="Share"
             onClick={(e) => {
               e.preventDefault();
-              console.log('CurrDoc: ', this.props.currDOC)
-              console.log(`Current doc ID: ${this.props.currDOC}`);
               alert(`Share this code to provide access to your document: ${this.props.currDOC}`)
             }}
           />
