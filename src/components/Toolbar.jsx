@@ -179,40 +179,36 @@ export default class Textbar extends React.Component {
      fn to each Menu item which calls a handler fn with selected val.
   */
   makePopOver(type, fnName, array) {
-    return (
-      <span>
-        <FormatSize color={'white'}
-          onMouseDown={(e) => {
-            e.preventDefault();
-            this.setState({
-              [`popOver${type}`]: true,
-              fontMenuEl: e.currentTarget
-            })
-          }}/>
-        <Popover open={this.state[`popOver${type}`]} anchorEl={this.state.fontMenuEl} anchorOrigin={{
-            horizontal: 'left',
-            vertical: 'bottom'
-          }} targetOrigin={{
-            horizontal: 'left',
-            vertical: 'top'
-          }} onRequestClose={() => this.setState({
-            [`popOver${type}`]: false
-          })}>
-          <Menu>
-            {
-              array.map((val) => (<MenuItem primaryText={val} onMouseDown={(e) => {
+      return (
+        <span>
+          <FormatSize color={'white'}
+          //  icon={icon}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              this.setState({[`popOver${type}`]:true, fontMenuEl: e.currentTarget})
+            }}
+          />
+          <Popover
+            open={this.state[`popOver${type}`]}
+            anchorEl={this.state.fontMenuEl}
+            anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+            targetOrigin={{horizontal: 'left', vertical: 'top'}}
+            onRequestClose={() => this.setState({[`popOver${type}`]: false})}
+          >
+            <Menu>
+              {array.map((val) => (<MenuItem
+                primaryText={val}
+                onMouseDown={(e) => {
                   e.preventDefault()
-                  this.setState({
-                    [`popOver${type}`]: false
-                  })
+                  this.setState({[`popOver${type}`]:false})
                   this[fnName](val)
-                }}/>))
-            }
-          </Menu>
-        </Popover>
-      </span>
-    )
-  };
+                }} />)
+              )}
+            </Menu>
+          </Popover>
+        </span>
+      )
+    }
 
   render() {
     // Toggle icon color with current styling:
@@ -255,7 +251,7 @@ export default class Textbar extends React.Component {
           <FormatAlignJustify onMouseDown={this.toggleAlignJustify} color={textAlign === 'JUSTIFY' ? 'black' : 'white'}/>
 
           {/* font-size dropdown menu */}
-          {this.makePopOver('fontSize', 'handleFontChange', ['14px', '18px', '20px', '24px', '26px', '36px', '48px'])}
+          {this.makePopOver('fontSize', 'handleFontChange', ['14px', '18px', '20px', '24px', '26px', '36px'])}
 
           {/* color picker dropdown selector */}
           <div onMouseDown={(e) => e.preventDefault()}>

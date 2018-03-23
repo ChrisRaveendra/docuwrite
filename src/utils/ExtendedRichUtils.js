@@ -1,10 +1,15 @@
 import { Modifier, EditorState, RichUtils } from 'draft-js';
 import getCurrentlySelectedBlock from './getCurrentlySelectedBlock'
 
+// Extend draftJS RichUtils module to include toggle for ContentBlock text-alignment
 const ALIGNMENT_DATA_KEY = 'textAlignment';
-
 const ExtendedRichUtils = Object.assign({}, RichUtils, {
-	// Largely copied from RichUtils' `toggleBlockType`
+
+	/* @params: editorState - object - holds draftJS EditorState
+							alignment - string - desired text-alignment
+		 @returns: object - draftJS EditorState with new ContentBlock meta-data
+		 Toggles text-alignment for ContentBlock
+	*/
 	toggleAlignment(editorState, alignment) {
 		const { content, currentBlock, hasAtomicBlock, target } = getCurrentlySelectedBlock(editorState);
 

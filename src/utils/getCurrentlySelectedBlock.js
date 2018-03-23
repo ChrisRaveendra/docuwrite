@@ -1,3 +1,9 @@
+/* @params: editorState - object - draftJS EditorState obj
+	 @returns: object - current - draftJS ContentState obj
+	 										currentBlock - selected draftJS ContentBlock obj
+											hasAtomicBlock - bool
+											target - draftJS selection for desired block						
+*/
 const getCurrentlySelectedBlock = (editorState) => {
 	const selection = editorState.getSelection();
 	const startKey = selection.getStartKey();
