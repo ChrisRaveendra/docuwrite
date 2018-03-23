@@ -18,6 +18,7 @@ import FormatUnderlined from 'material-ui/svg-icons/editor/format-underlined'
 import FormatAlignCenter from 'material-ui/svg-icons/editor/format-align-center'
 import FormatAlignLeft from 'material-ui/svg-icons/editor/format-align-left'
 import FormatAlignRight from 'material-ui/svg-icons/editor/format-align-right'
+import FormatAlignJustify from 'material-ui/svg-icons/editor/format-align-justify'
 
 import FormatSize from 'material-ui/svg-icons/editor/format-Size'
 import FormatColorText from 'material-ui/svg-icons/editor/format-color-text'
@@ -29,8 +30,12 @@ import FormatListNumbered from 'material-ui/svg-icons/editor/format-list-Numbere
 
 import Popover from 'material-ui/Popover'
 
+import {Editor, EditorState, RichUtils, Modifier} from 'draft-js';
+import ExtendedRichUtils from '../utils/ExtendedRichUtils';
+
 import createStyles from 'draft-js-custom-styles';
 import {connect} from 'react-redux';
+
 
 const customStyleMap = {
   MARK: {
@@ -45,6 +50,30 @@ const { styles, customStyleFn, exporter } = createStyles([
 ], 'CUSTOM_', customStyleMap);
 
 export default class Textbar extends React.Component {
+  toggleAlignRight = (e) => {
+    e.preventDefault();
+    const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "RIGHT");
+    this.handleEditorChange(newEditorState);
+  }
+
+  toggleAlignCenter = (e) => {
+    e.preventDefault();
+    const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "CENTER");
+    this.handleEditorChange(newEditorState);
+  }
+
+  toggleAlignLeft = (e) => {
+    e.preventDefault();
+    const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "LEFT");
+    this.handleEditorChange(newEditorState);
+  }
+
+  toggleAlignJustify = (e) => {
+    e.preventDefault();
+    const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "JUSTIFY");
+    this.handleEditorChange(newEditorState);
+  }
+
   toggleBold = (e) => {
     e.preventDefault();
     const newEditorState = styles.fontWeight.toggle(this.props.editorState, 'bold');
@@ -82,6 +111,24 @@ export default class Textbar extends React.Component {
     this.handleEditorChange(newEditorState);
   };
 
+  toggleUl = (e) => {
+    e.preventDefault();
+    const newEditorState = RichUtils.toggleBlockType(this.props.editorState,"unordered-list-item")
+    this.handleEditorChange(newEditorState);
+  }
+
+  toggleOl = (e) => {
+    e.preventDefault();
+    const newEditorState = RichUtils.toggleBlockType(this.props.editorState,"ordered-list-item")
+    this.handleEditorChange(newEditorState);
+  }
+
+  // toggleAlignment = (e) => {
+  //   e.preventDefault();
+  //   const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "RIGHT");
+  //   this.handleEditorChange(newEditorState);
+  // }
+
   handleEditorChange = (editorState) => {
     // debugger;
     this.props.updateEditor(editorState);
@@ -96,6 +143,7 @@ export default class Textbar extends React.Component {
 
   render() {
     let styles = this.props.editorState.getCurrentInlineStyle().toJS();
+    let blockStyle = this.props.editorState.getCurrentContent().getBlockMap().toJS();
     return (
       <div style={{
         'position': 'sticky',
@@ -113,16 +161,16 @@ export default class Textbar extends React.Component {
           <FormatUnderlined onMouseDown={this.toggleUnderline}
                             color={styles.includes("CUSTOM_TEXT_DECORATION_underline") ? 'black' : 'white'}/>
 
-          <FormatAlignLeft hoverColor={'black'} color={'white'}/>
+          <FormatAlignLeft onMouseDown={this.toggleAlignLeft} hoverColor={'black'} color={'white'}/>
 
-          <FormatAlignCenter hoverColor={'black'} color={'white'} onMouseDown={this.toggleCenter}
-            color={styles.includes("CUSTOM_FONT_WEIGHT_bold") ? 'black' : 'white'}
-          />
+          <FormatAlignCenter onMouseDown={this.toggleAlignCenter} hoverColor={'black'} color={'white'}/>
 
-          <FormatAlignRight hoverColor={'black'} color={'white'}/>
+          <FormatAlignRight onMouseDown={this.toggleAlignRight} hoverColor={'black'} color={'white'}/>
+
+          <FormatAlignJustify onMouseDown={this.toggleAlignJustify} hoverColor={'black'} color={'white'}/>
 
           <FormatSize hoverColor={'black'} color={'white'}/>
-          
+
           {/* <div>
           <RaisedButton
             onClick={this.handleClick}
@@ -164,9 +212,9 @@ export default class Textbar extends React.Component {
 
           {/* <FormatColorText hoverColor={'black'} color={'black'}/> */}
 
-          <FormatListBulleted hoverColor={'black'} color={'white'} onMouseDown={this.toggleBullet}/>
+          <FormatListBulleted onMouseDown={() => {this.toggleUl; console.log(blockStyle)}} color={'white'}/>
 
-          <FormatListNumbered hoverColor={'black'} color={'white'}/>
+          <FormatListNumbered onMouseDown={this.toggleOl} color={'white'}/>
 
         </Toolbar>
       </div>

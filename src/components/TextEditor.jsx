@@ -11,12 +11,29 @@ import createStyles from 'draft-js-custom-styles';
 import {getDefaultKeyBinding, KeyBindingUtil} from 'draft-js';
 const {hasCommandModifier} = KeyBindingUtil;
 
+
 const customStyleMap = {
   MARK: {
     backgroundColor: 'Yellow',
     fontStyle: 'italic'
   }
 };
+
+const ALIGNMENT_DATA_KEY = 'textAlignment';
+const blockStyleFn = (contentBlock) => {
+  const textAlignStyle = contentBlock.getData().get(ALIGNMENT_DATA_KEY);
+  switch (textAlignStyle) {
+    case 'RIGHT':
+      console.log('you should set right')
+      return `align-right`;
+    case 'CENTER':
+      return `align-center`;
+    case 'LEFT':
+      return `align-left`;
+    case 'JUSTIFY':
+      return `align-justify`;
+  }
+}
 
 //bind the cmd-b, cmd-i, and cmd-u keys to trigger style toggles
 const myKeyBindingFn = (e: SyntheticKeyboardEvent): string => {
@@ -50,7 +67,7 @@ export default class TextEditor extends React.Component {
   //  Tab exits the editor
   //  does show a selection state for bold/italic button click
   handleEditorChange = (editorState) => {
-    console.log(editorState.getCurrentContent().getBlockMap());
+  //  console.log(this.props.editorState.toJS());
     this.props.updateEditor(editorState);
   }
 
@@ -92,6 +109,8 @@ export default class TextEditor extends React.Component {
                 customStyleMap={customStyleMap}
                 handleKeyCommand={this.handleKeyCommand}
                 keyBindingFn={myKeyBindingFn}
+                // plugins={plugins}
+                blockStyleFn={blockStyleFn}
             />
       </Paper>
     </div>);
