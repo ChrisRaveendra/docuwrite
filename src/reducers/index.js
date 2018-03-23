@@ -1,7 +1,6 @@
 import { Editor, EditorState, SelectionState, RichUtils, convertFromRaw } from 'draft-js';
 import { debug } from 'util';
 import io from 'socket.io-client';
-const addr = 'http://10.2.110.121';
 
 const defaultState = {
   editorState: EditorState.createEmpty(),
@@ -12,7 +11,7 @@ const defaultState = {
   currState: null,
   socket: null,
   title: null,
-  isDarkTheme: false,
+  isDarkTheme: false
 };
 
 // defaultState.selectionState = defaultState.editorState.getSelection();
@@ -25,17 +24,12 @@ const reducer = (state = defaultState, action) => {
         ...state,
         editorState: action.editor,
       };
-    case 'UPDATE_TITLE':
-      return {
-        ...state,
-        title: action.title,
-      }
     case 'USER_LOGIN':
       return {
         ...state,
         loggedIn: action.data.username,
         userID: action.data.userID,
-        socket: io('http://10.2.110.121/:3000'),
+        socket: io('http://10.2.110.121:3000/'),
       };
     case 'UPDATE_TITLE':
       return {
@@ -54,6 +48,16 @@ const reducer = (state = defaultState, action) => {
       return {
         ...state,
         editorState: EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))),
+        title: action.title
+      };
+    case 'LEAVE_DOC':
+      return {
+      ...state,
+      currDOC: null,
+      currState: null,
+      title: null,
+      isDarkTheme: false,
+    }
     case 'UPDATE_THEME':
       return {
         ...state,
@@ -64,9 +68,11 @@ const reducer = (state = defaultState, action) => {
         ...state,
         loggedIn: null,
         currDOC: null,
+        currState: null,
+        title: null,
         socket: null,
         isDarkTheme: false,
-      };
+      }
     default:
       return state;
   }
