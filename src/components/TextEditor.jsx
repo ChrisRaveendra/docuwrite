@@ -119,7 +119,6 @@ class TextEditor extends React.Component {
   saveDoc() {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
-    // debugger;
     this.props.socket.emit('save-document',
     { docID: this.props.currDOC, state: stringState, title: this.props.title, date: Date.now()},
     ({ success }) => {
@@ -142,10 +141,6 @@ class TextEditor extends React.Component {
       }
       console.log('hello darkness my old friend')
     });
-  }
-
-  updateDoc() {
-
   }
 
   render() {
@@ -197,7 +192,6 @@ class TextEditor extends React.Component {
                 customStyleMap={customStyleMap}
                 handleKeyCommand={this.handleKeyCommand}
                 keyBindingFn={myKeyBindingFn}
-                // plugins={plugins}
                 blockStyleFn={blockStyleFn}
             />
       </Paper>
@@ -215,7 +209,7 @@ const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket, title }) => 
 });
 
 const mapStateToDispatch = dispatch => ({
-  updateTitle: title => dispatch({type: 'UPDATE_TITLE', title })
+  updateTitle: title => dispatch({ type: 'UPDATE_TITLE', title })
   // joinDoc: (room, state, docID) => dispatch({ type: 'JOIN_DOC', room, state, docID }),
 });
 

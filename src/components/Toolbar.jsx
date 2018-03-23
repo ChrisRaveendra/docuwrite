@@ -31,6 +31,7 @@ import FormatListBulleted from 'material-ui/svg-icons/editor/format-list-bullete
 import FormatListNumbered from 'material-ui/svg-icons/editor/format-list-Numbered';
 
 import Popover from 'material-ui/Popover';
+import Menu from 'material-ui/Menu';
 
 import {Editor, EditorState, RichUtils, Modifier} from 'draft-js';
 import ExtendedRichUtils from '../utils/ExtendedRichUtils';
@@ -126,6 +127,12 @@ export default class Textbar extends React.Component {
     this.handleEditorChange(newEditorState);
   };
 
+  handleFontChange = (e, font) => {
+    console.log(font)
+    const newEditorState = styles.fontSize.toggle(this.props.editorState, font);
+    this.handleEditorChange(newEditorState);
+  }
+
   render() {
     //set color toggles for icons
     const styles = this.props.editorState.getCurrentInlineStyle().toJS();
@@ -164,24 +171,40 @@ export default class Textbar extends React.Component {
 
           <FormatAlignJustify onMouseDown={this.toggleAlignJustify}
                               color={textAlign === 'JUSTIFY' ? 'black' : 'white'}/>
+          <div onMouseDown={(e) => e.preventDefault()}>
+            <IconMenu
+              disableAutoFocus={true}
+              iconButtonElement={<IconButton><FormatSize color={'white'}/></IconButton>}
+              animated={false}
+              anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+              menuItemStyle={{'fontSize': '12px', 'margin': 0}}
+              maxHeight={300}
+              onItemClick={this.handleFontChange} >
+            <div onMouseDown={(e) => e.preventDefault()}>
+                <MenuItem value="8px" primaryText="8" onMouseDown={this.handleFontChange}/>
+                <MenuItem value="9px" primaryText="9" />
+                <MenuItem value="10px" primaryText="10" />
+                <MenuItem value="11px" primaryText="11" />
+                <MenuItem value="12px" primaryText="12" />
+                <MenuItem value="14px" primaryText="14" />
+                <MenuItem value="18px" primaryText="18" />
+                <MenuItem value="24px" primaryText="24" />
+                <MenuItem value="30px" primaryText="30" />
+                <MenuItem value="36px" primaryText="36" />
+                <MenuItem value="48px" primaryText="48" />
+                <MenuItem value="60px" primaryText="60" />
+                <MenuItem value="72px" primaryText="72" />
+                <MenuItem value="96px" primaryText="96" />
+              </div>
+            </IconMenu>
+          </div>
 
-          <FormatSize hoverColor={'black'} color={textAlign === 'JUSTIFY' ? 'black' : 'white'}/>
-
-          {/* <FormatSize hoverColor={'black'} color={'white'}/> */}
-          {/* <div>
-          <RaisedButton
-            onClick={this.handleClick}
-            label="Click me"
-          />
-          <Popover
-            anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-            targetOrigin={{ horizontal: 'left', vertical: 'top' }}
-            onRequestClose={this.handleRequestClose}
-          > */}
+          <div onMouseDown={(e) => e.preventDefault()}>
           <IconMenu
-            iconButtonElement={<IconButton><FormatColorText /></IconButton>}
-            anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
-            targetOrigin={{ horizontal: 'left', vertical: 'top' }}
+            disableAutoFocus={true}
+            iconButtonElement={<IconButton><FormatColorText color={'white'}/></IconButton>}
+            animated={false}
+            anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
             >
 
             <MenuItem
@@ -204,10 +227,7 @@ export default class Textbar extends React.Component {
             <MenuItem value="Del" primaryText="Customize" />
 
           </IconMenu>
-          {/* </Popover>
-          </div> */}
-
-          {/* <FormatColorText hoverColor={'black'} color={'black'}/> */}
+        </div>
 
           <FormatListBulleted onMouseDown={this.toggleUl} color={blockStyle === 'unordered-list-item' ? 'black' : 'white'}/>
 
