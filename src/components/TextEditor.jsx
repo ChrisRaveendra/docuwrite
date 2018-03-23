@@ -62,10 +62,8 @@ class TextEditor extends React.Component {
       intervalHandler: null
     }
     const { handleUpdate } = this.props;
-    this.props.socket.on('updated-doc', ({ title, state} )=> {
-      debugger;
-      console.log('receiving state: ', state);
-      handleUpdate(state)
+    this.props.socket.on('updated-doc', ({ title, state })=> {
+      handleUpdate(state, title)
     });
   }
 
@@ -94,8 +92,9 @@ class TextEditor extends React.Component {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
     console.log('before save\n', stringState);
+    debugger;
     this.props.socket.emit('update-document',
-    { docID: this.props.currDOC, state: stringState,},
+    { docID: this.props.currDOC, state: stringState, title: this.props.title},
     ({ success }) => {
       console.log('success?!', success);
     });
@@ -133,8 +132,9 @@ class TextEditor extends React.Component {
   leaveDoc() {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
+    debugger;
     this.props.socket.emit('leave-document',
-    { docID: this.props.currDOC, state: stringState },
+    { docID: this.props.currDOC, state: stringState, title: this.props.title },
     ({ success }) => {
       if(success === true){
         this.props.leaveDoc();
@@ -208,12 +208,12 @@ TextEditor.propTypes = {
 };
 
 
-const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket }) => ({
-  currDOC, room, loggedIn, userID, socket
+const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket, title }) => ({
+  currDOC, room, loggedIn, userID, socket, title
 });
 
 const mapStateToDispatch = dispatch => ({
-  updateTitle: title => dispatch({ type: 'UPDATE_TITLE', title})
+  updateTitle: title => dispatch({ type: 'UPDATE_TITLE', title })
   // joinDoc: (room, state, docID) => dispatch({ type: 'JOIN_DOC', room, state, docID }),
 });
 

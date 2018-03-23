@@ -37,6 +37,11 @@ const reducer = (state = defaultState, action) => {
         userID: action.data.userID,
         socket: io('http://10.2.110.121/:3000'),
       };
+    case 'UPDATE_TITLE':
+      return {
+        ...state,
+        title: action.title
+      }
     case 'JOIN_DOC':
       return {
         ...state,
@@ -49,15 +54,6 @@ const reducer = (state = defaultState, action) => {
       return {
         ...state,
         editorState: EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))),
-        title: action.title,
-      };
-    case 'LEAVE_DOC':
-      return {
-        ...state,
-        currDOC: null,
-        title: null,
-        isDarkTheme: false,
-      };
     case 'UPDATE_THEME':
       return {
         ...state,
@@ -68,7 +64,6 @@ const reducer = (state = defaultState, action) => {
         ...state,
         loggedIn: null,
         currDOC: null,
-        room: null,
         socket: null,
         isDarkTheme: false,
       };
