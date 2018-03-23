@@ -8,27 +8,29 @@ import DropDownMenu from 'material-ui/DropDownMenu';
 import RaisedButton from 'material-ui/RaisedButton';
 import { Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
 import FlatButton from 'material-ui/FlatButton';
-import Toggle from 'material-ui/Toggle'
+import Toggle from 'material-ui/Toggle';
 
 
-import FormatBold from 'material-ui/svg-icons/editor/format-bold'
-import FormatItalic from 'material-ui/svg-icons/editor/format-italic'
-import FormatUnderlined from 'material-ui/svg-icons/editor/format-underlined'
+import FormatBold from 'material-ui/svg-icons/editor/format-bold';
+import FormatItalic from 'material-ui/svg-icons/editor/format-italic';
+import FormatUnderlined from 'material-ui/svg-icons/editor/format-underlined';
 
-import FormatAlignCenter from 'material-ui/svg-icons/editor/format-align-center'
-import FormatAlignLeft from 'material-ui/svg-icons/editor/format-align-left'
-import FormatAlignRight from 'material-ui/svg-icons/editor/format-align-right'
-import FormatAlignJustify from 'material-ui/svg-icons/editor/format-align-justify'
+import FormatAlignCenter from 'material-ui/svg-icons/editor/format-align-center';
+import FormatAlignLeft from 'material-ui/svg-icons/editor/format-align-left';
+import FormatAlignRight from 'material-ui/svg-icons/editor/format-align-right';
+import FormatAlignJustify from 'material-ui/svg-icons/editor/format-align-justify';
 
-import FormatSize from 'material-ui/svg-icons/editor/format-Size'
-import FormatColorText from 'material-ui/svg-icons/editor/format-color-text'
-import { SketchPicker, GithubPicker } from 'react-color'
+import Code from 'material-ui/svg-icons/action/code';
+
+import FormatSize from 'material-ui/svg-icons/editor/format-Size';
+import FormatColorText from 'material-ui/svg-icons/editor/format-color-text';
+import { SketchPicker, GithubPicker } from 'react-color';
 
 
-import FormatListBulleted from 'material-ui/svg-icons/editor/format-list-bulleted'
-import FormatListNumbered from 'material-ui/svg-icons/editor/format-list-Numbered'
+import FormatListBulleted from 'material-ui/svg-icons/editor/format-list-bulleted';
+import FormatListNumbered from 'material-ui/svg-icons/editor/format-list-Numbered';
 
-import Popover from 'material-ui/Popover'
+import Popover from 'material-ui/Popover';
 
 import {Editor, EditorState, RichUtils, Modifier} from 'draft-js';
 import ExtendedRichUtils from '../utils/ExtendedRichUtils';
@@ -105,6 +107,12 @@ export default class Textbar extends React.Component {
     this.handleEditorChange(newEditorState);
   }
 
+  toggleCodeBlock = (e) => {
+    e.preventDefault();
+    const newEditorState = RichUtils.toggleBlockType(this.props.editorState,"code-block")
+    this.handleEditorChange(newEditorState);
+  }
+
   handleEditorChange = (editorState) => {
     this.props.updateEditor(editorState);
   }
@@ -117,9 +125,10 @@ export default class Textbar extends React.Component {
   };
 
   render() {
+    //set color toggles for icons
     const styles = this.props.editorState.getCurrentInlineStyle().toJS();
     const {currentBlock} = getCurrentlySelectedBlock(this.props.editorState);
-  //  console.log(getCurrentlySelectedBlock(this.props.editorState));
+    const blockStyle = currentBlock.toJS().type;
     const textAlign = currentBlock.getData().get("textAlignment") === undefined ?
                       "LEFT" :
                       currentBlock.getData().get("textAlignment");
@@ -140,6 +149,8 @@ export default class Textbar extends React.Component {
           <FormatUnderlined onMouseDown={this.toggleUnderline}
                             color={styles.includes("CUSTOM_TEXT_DECORATION_underline") ? 'black' : 'white'}/>
 
+          <Code onMouseDown={this.toggleCodeBlock} color={blockStyle === 'code-block' ? 'black' : 'white'}/>
+
           <FormatAlignLeft onMouseDown={this.toggleAlignLeft}
                            color={textAlign === 'LEFT' ? 'black' : 'white'}/>
 
@@ -152,7 +163,7 @@ export default class Textbar extends React.Component {
           <FormatAlignJustify onMouseDown={this.toggleAlignJustify}
                               color={textAlign === 'JUSTIFY' ? 'black' : 'white'}/>
 
-          <FormatSize hoverColor={'black'} color={'white'}/>
+          <FormatSize hoverColor={'black'} color={textAlign === 'JUSTIFY' ? 'black' : 'white'}/>
 
           {/* <div>
           <RaisedButton
@@ -195,9 +206,9 @@ export default class Textbar extends React.Component {
 
           {/* <FormatColorText hoverColor={'black'} color={'black'}/> */}
 
-          <FormatListBulleted onMouseDown={this.toggleUl} hoverColor={'black'} color={'white'}/>
+          <FormatListBulleted onMouseDown={this.toggleUl} color={blockStyle === 'unordered-list-item' ? 'black' : 'white'}/>
 
-          <FormatListNumbered onMouseDown={this.toggleOl} hoverColor={'black'} color={'white'}/>
+          <FormatListNumbered onMouseDown={this.toggleOl} color={blockStyle === 'ordered-list-item' ? 'black' : 'white'}/>
 
         </Toolbar>
       </div>
