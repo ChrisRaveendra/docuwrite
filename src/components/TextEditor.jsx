@@ -58,13 +58,20 @@ const {styles, customStyleFn, exporter} = createStyles([
 class TextEditor extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      intervalHandler: null
+    }
     const { handleUpdate } = this.props;
     this.props.socket.on('updated-doc', ({ title, state })=> {
       handleUpdate(state, title)
     });
   }
-
+  componentDidMount() {
+    const _saveDocs = this.saveDoc.bind(this);
+    this.setState({ intervalHandler: _saveDocs() });
+  }
   componentWillUnmount() {
+    clearInterval(this.state.intervalHandler);
     this.props.socket.off();
   }
     // Update editor state & selection state then pass these new states to the UPDATE action
@@ -83,7 +90,7 @@ class TextEditor extends React.Component {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
     console.log('before save\n', stringState);
-    debugger;
+    // debugger;
     this.props.socket.emit('update-document',
     { docID: this.props.currDOC, state: stringState, title: this.props.title},
     ({ success }) => {
@@ -112,7 +119,7 @@ class TextEditor extends React.Component {
   saveDoc() {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
-    debugger;
+    // debugger;
     this.props.socket.emit('save-document',
     { docID: this.props.currDOC, state: stringState, title: this.props.title},
     ({ success }) => {
@@ -124,7 +131,7 @@ class TextEditor extends React.Component {
   leaveDoc() {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
-    debugger;
+    // debugger;
     this.props.socket.emit('leave-document',
     { docID: this.props.currDOC, state: stringState, title: this.props.title },
     ({ success }) => {
