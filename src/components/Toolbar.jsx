@@ -41,12 +41,7 @@ import {connect} from 'react-redux';
 import getCurrentlySelectedBlock from '../utils/getCurrentlySelectedBlock';
 
 
-const customStyleMap = {
-  MARK: {
-    backgroundColor: 'Yellow',
-    fontStyle: 'italic'
-  }
-};
+const customStyleMap = {};
 
 // Passing the customStyleMap is optional
 const { styles, customStyleFn, exporter } = createStyles([
@@ -54,60 +49,52 @@ const { styles, customStyleFn, exporter } = createStyles([
 ], 'CUSTOM_', customStyleMap);
 
 export default class Textbar extends React.Component {
+  state = {}
   toggleAlignRight = (e) => {
     e.preventDefault();
     const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "RIGHT");
     this.handleEditorChange(newEditorState);
   }
-
   toggleAlignCenter = (e) => {
     e.preventDefault();
     const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "CENTER");
     this.handleEditorChange(newEditorState);
   }
-
   toggleAlignLeft = (e) => {
     e.preventDefault();
     const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "LEFT");
     this.handleEditorChange(newEditorState);
   }
-
   toggleAlignJustify = (e) => {
     e.preventDefault();
     const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "JUSTIFY");
     this.handleEditorChange(newEditorState);
   }
-
   toggleBold = (e) => {
     e.preventDefault();
     const newEditorState = styles.fontWeight.toggle(this.props.editorState, 'bold');
     this.handleEditorChange(newEditorState);
   };
-
   toggleItalic = (e) => {
     e.preventDefault();
     const newEditorState = styles.fontStyle.toggle(this.props.editorState, 'italic');
     this.handleEditorChange(newEditorState);
   };
-
   toggleUnderline = (e) => {
     e.preventDefault();
     const newEditorState = styles.textDecoration.toggle(this.props.editorState, 'underline');
     this.handleEditorChange(newEditorState);
   };
-
   toggleUl = (e) => {
     e.preventDefault();
     const newEditorState = RichUtils.toggleBlockType(this.props.editorState,"unordered-list-item")
     this.handleEditorChange(newEditorState);
   }
-
   toggleOl = (e) => {
     e.preventDefault();
     const newEditorState = RichUtils.toggleBlockType(this.props.editorState,"ordered-list-item")
     this.handleEditorChange(newEditorState);
   }
-
   toggleCodeBlock = (e) => {
     e.preventDefault();
     const newEditorState = RichUtils.toggleBlockType(this.props.editorState,"code-block")
@@ -115,21 +102,49 @@ export default class Textbar extends React.Component {
   }
 
   handleEditorChange = (editorState) => {
-    // debugger;
-    // this.props.
     this.props.updateEditor(editorState);
   }
 
   handleChangeComplete = (color) => {
-    console.log('old: ', this.props.editorState.getCurrentInlineStyle().toJS());
     const newEditorState = styles.color.toggle(this.props.editorState, color.hex);
-    console.log('updated: ', newEditorState.getCurrentInlineStyle().toJS());
     this.handleEditorChange(newEditorState);
   };
 
-  handleFontChange = (e) => {
-    const newEditorState = styles.fontSize.toggle(this.props.editorState, '8px');
+  handleFontChange = (font) => {
+    const newEditorState = styles.fontSize.toggle(this.props.editorState, font);
     this.handleEditorChange(newEditorState);
+  }
+
+  makePopOver(type, fnName, array) {
+    return (
+      <span>
+        <FormatSize color={'white'}
+        //  icon={icon}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            this.setState({[`popOver${type}`]:true, fontMenuEl: e.currentTarget})
+          }}
+        />
+        <Popover
+          open={this.state[`popOver${type}`]}
+          anchorEl={this.state.fontMenuEl}
+          anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+          targetOrigin={{horizontal: 'left', vertical: 'top'}}
+          onRequestClose={() => this.setState({[`popOver${type}`]: false})}
+        >
+          <Menu>
+            {array.map((val) => (<MenuItem
+              primaryText={val}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                this.setState({[`popOver${type}`]:false})
+                this[fnName](val)
+              }} />)
+            )}
+          </Menu>
+        </Popover>
+      </span>
+    )
   }
 
   render() {
@@ -170,33 +185,8 @@ export default class Textbar extends React.Component {
 
           <FormatAlignJustify onMouseDown={this.toggleAlignJustify}
                               color={textAlign === 'JUSTIFY' ? 'black' : 'white'}/>
-          <div onMouseDown={(e) => e.preventDefault()}>
-            <IconMenu
-              disableAutoFocus={true}
-              iconButtonElement={<IconButton><FormatSize color={'white'}/></IconButton>}
-              animated={false}
-              anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-              menuItemStyle={{'fontSize': '12px', 'margin': 0}}
-              maxHeight={300}
-              onItemClick={this.handleFontChange} >
-            <div onMouseDown={(e) => e.preventDefault()}>
-                <MenuItem value="8px" primaryText="8" onMouseDown={this.handleFontChange}/>
-                <MenuItem value="9px" primaryText="9" />
-                <MenuItem value="10px" primaryText="10" />
-                <MenuItem value="11px" primaryText="11" />
-                <MenuItem value="12px" primaryText="12" />
-                <MenuItem value="14px" primaryText="14" />
-                <MenuItem value="18px" primaryText="18" />
-                <MenuItem value="24px" primaryText="24" />
-                <MenuItem value="30px" primaryText="30" />
-                <MenuItem value="36px" primaryText="36" />
-                <MenuItem value="48px" primaryText="48" />
-                <MenuItem value="60px" primaryText="60" />
-                <MenuItem value="72px" primaryText="72" />
-                <MenuItem value="96px" primaryText="96" />
-              </div>
-            </IconMenu>
-          </div>
+
+          {this.makePopOver('fontSize', 'handleFontChange', ['14px', '18px', '20px', '24px', '26px', '36px'])}
 
           <div onMouseDown={(e) => e.preventDefault()}>
           <IconMenu

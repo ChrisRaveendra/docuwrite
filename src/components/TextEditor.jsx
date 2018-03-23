@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
-import {Editor, EditorState, RichUtils, convertToRaw, Modifier} from 'draft-js';
+import {Editor, EditorState, RichUtils, convertToRaw, Modifier, SelectionState} from 'draft-js';
 import {OrderedSet} from 'immutable';
 import Paper from 'material-ui/Paper';
 import Textbar from './Toolbar';
@@ -14,12 +14,8 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Home from 'material-ui/svg-icons/action/Home'
 
 
-const customStyleMap = {
-  MARK: {
-    backgroundColor: 'Yellow',
-    fontStyle: 'italic'
-  }
-};
+const customStyleMap = {};
+const USER_COLORS = ['green', 'red', 'blue'];
 
 const ALIGNMENT_DATA_KEY = 'textAlignment';
 const blockStyleFn = (contentBlock) => {
@@ -59,11 +55,17 @@ class TextEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      intervalHandler: null
+      intervalHandler: null,
+      users: []
     }
     const { handleUpdate } = this.props;
     this.props.socket.on('updated-doc', ({ title, state, date })=> {
       handleUpdate(state, title, date)
+    });
+    this.props.socket.on('user-joined', ({name, userID}) => {
+      console.log('before', this.state.users);
+      this.setState({users: [...this.state.users, {name: name, userID: userID}] });
+      console.log('after', this.state.users);
     });
   }
   componentDidMount() {
@@ -85,9 +87,25 @@ class TextEditor extends React.Component {
   //  shows empty selection state for commands (ctrl + z)
   //  Tab exits the editor
   //  does show a selection state for bold/italic button click
-  handleEditorChange = (editorState) => {
+  handleSelections = (editorState, isLeaving) => {
+    let currentContent = editorState.getCurrentContent();
+    const currentSelection = editorState.getSelection();
+    const firstBlock = currentContent.getFirstBlock();
+    const lastBlock = currentContent.getLastBlock();
+    const allSelection = SelectionState.createEmpty(firstBlock.getKey()).merge({
+      focusKey: lastBlock.getKey(),
+      focusOffset: lastBlock.getLength(),
+    });
 
-    let stringState = convertToRaw(this.props.editorState.getCurrentContent());
+    currentContent = Modifier.removeInlineStyle(currentContent, allSelection, this.props.userID);
+    currentContent = isLeaving ? currentContent : Modifier.applyInlineStyle(currentContent, currentSelection, this.props.userID);
+    editorState = EditorState.createWithContent(currentContent);
+    return EditorState.forceSelection(editorState, currentSelection);
+  }
+
+  handleEditorChange = (editorState) => {
+    editorState = this.handleSelections(editorState, false);
+    let stringState = convertToRaw(editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
     console.log('before save\n', stringState);
     // debugger;
@@ -128,7 +146,8 @@ class TextEditor extends React.Component {
 
   //Move up from Doc to User home page
   leaveDoc() {
-    let stringState = convertToRaw(this.props.editorState.getCurrentContent());
+    const editorState = this.handleSelections(this.props.editorState, true);
+    let stringState = convertToRaw(editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
     // debugger;
     this.props.socket.emit('leave-document',
@@ -144,6 +163,14 @@ class TextEditor extends React.Component {
   }
 
   render() {
+    for(let i =0; i < this.props.contributors.length; i++) {
+      if(this.props.contributors[i] !== this.props.userID) {
+        console.log(this.props.contributors[i], i);
+        customStyleMap[this.props.contributors[i]] = {
+          backgroundColor: USER_COLORS[i % USER_COLORS.length]
+        }
+      }
+    }
     return (<div id='content'>
       <div style={{'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between'}}>
         <TextField hintText={this.props.title}

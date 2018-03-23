@@ -116,8 +116,11 @@ io.on('connection', (socket) => {
         if (!secretToken) {
           secretToken = sharedDocs[docAuth.docID] = md5(`${docAuth.docID + Math.random()}miao`);
         }
-        ackCB({ title: doc.title, state: doc.state });
+        let data = { title: doc.title, state: doc.state, contributors: doc.owners };
+        console.log('acking back with data: ', data);
+        ackCB(data);
         socket.join(secretToken);
+        // socket.to(secretToken).emit('user-joined', {name: docAuth.loggedIn, userID: docAuth.userID})
       }
     })
     .catch((error) => {

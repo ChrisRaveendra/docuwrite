@@ -61,21 +61,21 @@ class Home extends React.Component {
     }).catch(err => console.log(err));
   }
   createNewDoc(e) {
-    debugger;
+    // debugger;
     e.preventDefault();
 
     axios.get('http://localhost:3000/newdoc')
     .then(({ data }) => {
       if (data.success) {
-        this.props.socket.emit('join-document', { userID: this.props.userID, docID: data.docs._id}, ({title, state}) => {
-          if (title) { this.props.joinDoc(title, state, data.docs._id); }
+        this.props.socket.emit('join-document', { userID: this.props.userID, docID: data.docs._id}, ({title, state, contributors}) => {
+          if (title) { this.props.joinDoc(title, state, data.docs._id, contributors); }
         });
       }
     })
     .catch(err => console.log(err));
   }
   deleteDocs() {
-    debugger;
+    // debugger;
     const selectedDocIDs = this.state.documents
                           .filter((x, index) => this.state.selected.indexOf(index) > -1)
                           .map(doc => doc._id);
@@ -102,9 +102,13 @@ class Home extends React.Component {
   openDoc(rowNum, colNum) {
     // console.log('in openDoc', rowNum, colNum);
     if (this.state.documents[rowNum]) {
-      this.props.socket.emit('join-document', { userID: this.props.userID, docID: this.state.documents[rowNum]._id}, ({title, state}) => {
+      console.log(this.props.userID);
+      this.props.socket.emit('join-document',
+      { userID: this.props.userID, loggedIn: this.props.loggedIn, docID: this.state.documents[rowNum]._id}, (data) => {
+        console.log(data);
+      const  {title, state, contributors} = data;
         if (title) {
-          this.props.joinDoc(title, state, this.state.documents[rowNum]._id);
+          this.props.joinDoc(title, state, this.state.documents[rowNum]._id, contributors);
         }
       });
     }
@@ -120,6 +124,7 @@ class Home extends React.Component {
   }
 
   render() {
+    console.log(this.props.contributors);
     const dateStyles = {
       weekday: 'short',
       year: 'numeric',
@@ -269,12 +274,12 @@ Home.propTypes = {
 };
 
 
-const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket, title }) => ({
-  currDOC, room, loggedIn, userID, socket, title
+const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket, title, contributors }) => ({
+  currDOC, room, loggedIn, userID, socket, title, contributors
 });
 
 const mapStateToDispatch = dispatch => ({
-  joinDoc: (title, state, docID) => dispatch({ type: 'JOIN_DOC', title, state, docID }),
+  joinDoc: (title, state, docID, contributors) => dispatch({ type: 'JOIN_DOC', title, state, docID, contributors }),
   logout: () => dispatch({ type: 'LOGOUT' })
 });
 

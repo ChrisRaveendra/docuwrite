@@ -11,6 +11,7 @@ const defaultState = {
   currState: null,
   socket: null,
   title: null,
+  contributors: null,
   isDarkTheme: false
 };
 
@@ -42,9 +43,9 @@ const reducer = (state = defaultState, action) => {
         currDOC: action.docID,
         editorState: action.state ? EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))) : EditorState.createEmpty(),
         title: action.title,
+        contributors: action.contributors
       };
     case 'UPDATE_DOC':
-      debugger;
       return {
         ...state,
         editorState: EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))),
@@ -57,6 +58,7 @@ const reducer = (state = defaultState, action) => {
       currDOC: null,
       currState: null,
       title: null,
+      contributors: null,
       isDarkTheme: false,
     }
     case 'UPDATE_THEME':
@@ -71,6 +73,7 @@ const reducer = (state = defaultState, action) => {
         currDOC: null,
         currState: null,
         title: null,
+        contributors: null,
         date: null,
         socket: null,
         isDarkTheme: false,
