@@ -127,9 +127,8 @@ export default class Textbar extends React.Component {
     this.handleEditorChange(newEditorState);
   };
 
-  handleFontChange = (e, font) => {
-    console.log(font)
-    const newEditorState = styles.fontSize.toggle(this.props.editorState, font);
+  handleFontChange = (e) => {
+    const newEditorState = styles.fontSize.toggle(this.props.editorState, '8px');
     this.handleEditorChange(newEditorState);
   }
 
