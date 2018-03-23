@@ -94,7 +94,7 @@ class Home extends React.Component {
       emails: this.state.shareEmail
     },
     (({ success }) => {
-      console.log('success?!? ', success );
+      console.log('success in sharedocs?!? ', success );
       this.setState({dialogShareOpen: false, selected: [] });
     })
     )
