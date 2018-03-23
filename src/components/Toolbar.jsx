@@ -31,6 +31,7 @@ import FormatListBulleted from 'material-ui/svg-icons/editor/format-list-bullete
 import FormatListNumbered from 'material-ui/svg-icons/editor/format-list-Numbered';
 
 import Popover from 'material-ui/Popover';
+import Menu from 'material-ui/Menu';
 
 import {Editor, EditorState, RichUtils, Modifier} from 'draft-js';
 import ExtendedRichUtils from '../utils/ExtendedRichUtils';
@@ -40,12 +41,7 @@ import {connect} from 'react-redux';
 import getCurrentlySelectedBlock from '../utils/getCurrentlySelectedBlock';
 
 
-const customStyleMap = {
-  MARK: {
-    backgroundColor: 'Yellow',
-    fontStyle: 'italic'
-  }
-};
+const customStyleMap = {};
 
 // Passing the customStyleMap is optional
 const { styles, customStyleFn, exporter } = createStyles([
@@ -53,60 +49,52 @@ const { styles, customStyleFn, exporter } = createStyles([
 ], 'CUSTOM_', customStyleMap);
 
 export default class Textbar extends React.Component {
+  state = {}
   toggleAlignRight = (e) => {
     e.preventDefault();
     const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "RIGHT");
     this.handleEditorChange(newEditorState);
   }
-
   toggleAlignCenter = (e) => {
     e.preventDefault();
     const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "CENTER");
     this.handleEditorChange(newEditorState);
   }
-
   toggleAlignLeft = (e) => {
     e.preventDefault();
     const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "LEFT");
     this.handleEditorChange(newEditorState);
   }
-
   toggleAlignJustify = (e) => {
     e.preventDefault();
     const newEditorState = ExtendedRichUtils.toggleAlignment(this.props.editorState, "JUSTIFY");
     this.handleEditorChange(newEditorState);
   }
-
   toggleBold = (e) => {
     e.preventDefault();
     const newEditorState = styles.fontWeight.toggle(this.props.editorState, 'bold');
     this.handleEditorChange(newEditorState);
   };
-
   toggleItalic = (e) => {
     e.preventDefault();
     const newEditorState = styles.fontStyle.toggle(this.props.editorState, 'italic');
     this.handleEditorChange(newEditorState);
   };
-
   toggleUnderline = (e) => {
     e.preventDefault();
     const newEditorState = styles.textDecoration.toggle(this.props.editorState, 'underline');
     this.handleEditorChange(newEditorState);
   };
-
   toggleUl = (e) => {
     e.preventDefault();
     const newEditorState = RichUtils.toggleBlockType(this.props.editorState,"unordered-list-item")
     this.handleEditorChange(newEditorState);
   }
-
   toggleOl = (e) => {
     e.preventDefault();
     const newEditorState = RichUtils.toggleBlockType(this.props.editorState,"ordered-list-item")
     this.handleEditorChange(newEditorState);
   }
-
   toggleCodeBlock = (e) => {
     e.preventDefault();
     const newEditorState = RichUtils.toggleBlockType(this.props.editorState,"code-block")
@@ -114,17 +102,50 @@ export default class Textbar extends React.Component {
   }
 
   handleEditorChange = (editorState) => {
-    // debugger;
-    // this.props.
     this.props.updateEditor(editorState);
   }
 
   handleChangeComplete = (color) => {
-    console.log('old: ', this.props.editorState.getCurrentInlineStyle().toJS());
     const newEditorState = styles.color.toggle(this.props.editorState, color.hex);
-    console.log('updated: ', newEditorState.getCurrentInlineStyle().toJS());
     this.handleEditorChange(newEditorState);
   };
+
+  handleFontChange = (font) => {
+    const newEditorState = styles.fontSize.toggle(this.props.editorState, font);
+    this.handleEditorChange(newEditorState);
+  }
+
+  makePopOver(type, fnName, array) {
+    return (
+      <span>
+        <FormatSize color={'white'}
+        //  icon={icon}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            this.setState({[`popOver${type}`]:true, fontMenuEl: e.currentTarget})
+          }}
+        />
+        <Popover
+          open={this.state[`popOver${type}`]}
+          anchorEl={this.state.fontMenuEl}
+          anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+          targetOrigin={{horizontal: 'left', vertical: 'top'}}
+          onRequestClose={() => this.setState({[`popOver${type}`]: false})}
+        >
+          <Menu>
+            {array.map((val) => (<MenuItem
+              primaryText={val}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                this.setState({[`popOver${type}`]:false})
+                this[fnName](val)
+              }} />)
+            )}
+          </Menu>
+        </Popover>
+      </span>
+    )
+  }
 
   render() {
     //set color toggles for icons
@@ -165,23 +186,14 @@ export default class Textbar extends React.Component {
           <FormatAlignJustify onMouseDown={this.toggleAlignJustify}
                               color={textAlign === 'JUSTIFY' ? 'black' : 'white'}/>
 
-          <FormatSize hoverColor={'black'} color={textAlign === 'JUSTIFY' ? 'black' : 'white'}/>
+          {this.makePopOver('fontSize', 'handleFontChange', ['14px', '18px', '20px', '24px', '26px', '36px'])}
 
-          {/* <FormatSize hoverColor={'black'} color={'white'}/> */}
-          {/* <div>
-          <RaisedButton
-            onClick={this.handleClick}
-            label="Click me"
-          />
-          <Popover
-            anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-            targetOrigin={{ horizontal: 'left', vertical: 'top' }}
-            onRequestClose={this.handleRequestClose}
-          > */}
+          <div onMouseDown={(e) => e.preventDefault()}>
           <IconMenu
-            iconButtonElement={<IconButton><FormatColorText /></IconButton>}
-            anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
-            targetOrigin={{ horizontal: 'left', vertical: 'top' }}
+            disableAutoFocus={true}
+            iconButtonElement={<IconButton><FormatColorText color={'white'}/></IconButton>}
+            animated={false}
+            anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
             >
 
             <MenuItem
@@ -190,7 +202,6 @@ export default class Textbar extends React.Component {
                 {this.handleChangeComplete}
               />}
             />
-
             <MenuItem
               primaryText="Case Tools"
               menuItems={[
@@ -202,17 +213,10 @@ export default class Textbar extends React.Component {
             />
             {/* <Divider /> */}
             <MenuItem value="Del" primaryText="Customize" />
-
           </IconMenu>
-          {/* </Popover>
-          </div> */}
-
-          {/* <FormatColorText hoverColor={'black'} color={'black'}/> */}
-
+        </div>
           <FormatListBulleted onMouseDown={this.toggleUl} color={blockStyle === 'unordered-list-item' ? 'black' : 'white'}/>
-
           <FormatListNumbered onMouseDown={this.toggleOl} color={blockStyle === 'ordered-list-item' ? 'black' : 'white'}/>
-
         </Toolbar>
       </div>
     );

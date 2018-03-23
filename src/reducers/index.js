@@ -1,7 +1,6 @@
 import { Editor, EditorState, SelectionState, RichUtils, convertFromRaw } from 'draft-js';
 import { debug } from 'util';
 import io from 'socket.io-client';
-const addr = 'http://10.2.110.121';
 
 const defaultState = {
   editorState: EditorState.createEmpty(),
@@ -12,7 +11,8 @@ const defaultState = {
   currState: null,
   socket: null,
   title: null,
-  isDarkTheme: false,
+  contributors: null,
+  isDarkTheme: false
 };
 
 // defaultState.selectionState = defaultState.editorState.getSelection();
@@ -25,32 +25,42 @@ const reducer = (state = defaultState, action) => {
         ...state,
         editorState: action.editor,
       };
-    case 'UPDATE_TITLE':
-      return {
-        ...state,
-        title: action.title,
-      };
     case 'USER_LOGIN':
       return {
         ...state,
         loggedIn: action.data.username,
         userID: action.data.userID,
-        socket: io('http://10.2.110.121/:3000'),
+        socket: io('http://localhost:3000/'),
       };
+    case 'UPDATE_TITLE':
+      return {
+        ...state,
+        title: action.title
+      }
     case 'JOIN_DOC':
       return {
         ...state,
         currDOC: action.docID,
         editorState: action.state ? EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))) : EditorState.createEmpty(),
         title: action.title,
+        contributors: action.contributors
       };
     case 'UPDATE_DOC':
-      // debugger;
       return {
         ...state,
         editorState: EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))),
         title: action.title,
-      }
+        date: action.date
+      };
+    case 'LEAVE_DOC':
+      return {
+      ...state,
+      currDOC: null,
+      currState: null,
+      title: null,
+      contributors: null,
+      isDarkTheme: false,
+    }
     case 'UPDATE_THEME':
       return {
         ...state,
@@ -61,9 +71,13 @@ const reducer = (state = defaultState, action) => {
         ...state,
         loggedIn: null,
         currDOC: null,
+        currState: null,
+        title: null,
+        contributors: null,
+        date: null,
         socket: null,
         isDarkTheme: false,
-      };
+      }
     default:
       return state;
   }

@@ -92,6 +92,15 @@ passport.use(new LocalStrategy((email, password, done) => {
 app.use('/', auth.authRouter(passport));
 app.use('/', routes);
 
+const dateStyles = {
+  weekday: 'short',
+  year: 'numeric',
+  month: 'long',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+};
 
 const sharedDocs = {};
 io.on('connection', (socket) => {
@@ -107,7 +116,7 @@ io.on('connection', (socket) => {
         if (!secretToken) {
           secretToken = sharedDocs[docAuth.docID] = md5(`${docAuth.docID + Math.random()}miao`);
         }
-        ackCB({ title: doc.title, state: doc.state });
+        ackCB({ title: doc.title, state: doc.state, contributors: doc.owners });
         socket.join(secretToken);
       }
     })
@@ -118,14 +127,30 @@ io.on('connection', (socket) => {
   });
 
   socket.on('share-document', (docAuth, ackCB) => {
-    const { docIDs, userIDs } = docAuth;
-    console.log('docIDs, ', docIDs);
-    console.log('userIDs, ', userIDs);
+    const { docIDs, emails } = docAuth;
+    User.findOne({ email: emails })
+    .then((user) => {
+      Document.update(
+        { _id: { $in: [...docIDs.map(docID => mongoose.Types.ObjectId(docID))] } },
+        { $addToSet: { owners: mongoose.Types.ObjectId(user._id) } },
+        { multi: true })
+      .then((doc) => {
+        ackCB({ success: true });
+      })
+      .catch((err) => {
+        console.log('error: ', err);
+        ackCB({ success: err });
+      });
+    });
+    // Document.update({ _id: { $in: [...docIDs.map(docID => mongoose.Types.ObjectId(docID))] } }, { $addToSet: {}})
+    // Promise.all(docIds.map(doc => Document.findOneAndUpdate({_id: mongoose.Types.ObjectId(doc), 'emails'},)))
+    // Document.find({ _id: { $in: [...docIDs.map(docID => mongoose.Types.ObjectId(docID))] } })
+    // .exec().then(())
   });
 
   socket.on('save-document', (docAuth, ackCB) => {
     Document.findByIdAndUpdate(docAuth.docID,
-      { $set: { state: docAuth.state, title: docAuth.title } },
+      { $set: { state: docAuth.state, title: docAuth.title, createdAt: docAuth.date } },
       { new: true })
       .exec()
     .then((doc) => {
@@ -133,7 +158,7 @@ io.on('connection', (socket) => {
         ackCB({ success: 'no document found' });
       } else {
         ackCB({ success: true });
-        socket.to(sharedDocs[doc._id]).emit('updated-doc', { title: doc.title, state: doc.state });
+        socket.to(sharedDocs[doc._id]).emit('updated-doc', { title: doc.title, state: doc.state});
       }
     })
     .catch((error) => {
@@ -149,7 +174,7 @@ io.on('connection', (socket) => {
 
   socket.on('leave-document', (docAuth, ackCB) => {
     Document.findByIdAndUpdate(docAuth.docID,
-      { state: docAuth.state, title: docAuth.title },
+      { state: docAuth.state, title: docAuth.title, createdAt: docAuth.date },
       { new: true }).exec()
         .then((doc) => {
           if (!doc) {

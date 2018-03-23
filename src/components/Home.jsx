@@ -21,6 +21,9 @@ import {
 import IconMenu from 'material-ui/IconMenu';
 import IconButton from 'material-ui/IconButton';
 import AddContentIcon from 'material-ui/svg-icons/content/add';
+import NewDocIcon from 'material-ui/svg-icons/action/note-add';
+import AddCircleIcon from 'material-ui/svg-icons/content/add-circle';
+import TextField from 'material-ui/TextField';
 // import FontIcon from 'material-ui/FontIcon';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import SocialShareIcon from 'material-ui/svg-icons/social/share';
@@ -31,7 +34,12 @@ import axios from 'axios';
 import { connect } from 'react-redux';
 
 
-
+import List, {
+  ListItem,
+  ListItemAvatar,
+  ListItemIcon,
+  ListItemText,
+} from 'material-ui/List';
 
 class Home extends React.Component {
   constructor(props) {
@@ -39,32 +47,35 @@ class Home extends React.Component {
     this.state = {
       documents: [],
       selected: [],
-      dialogOpen: false,
+      dialogDeleteOpen: false,
+      dialogShareOpen: false,
+      shareEmail: null
     };
   }
 
   componentWillMount() {
-    axios.get('http://10.2.110.121:3000/docs').then(({ data }) => {
+    axios.get('http://localhost:3000/docs').then(({ data }) => {
       if (data.success) {
         this.setState({ documents: data.docs });
       }
     }).catch(err => console.log(err));
   }
   createNewDoc(e) {
-    debugger;
+    // debugger;
     e.preventDefault();
 
-    axios.get('http://10.2.110.121:3000/newdoc')
+    axios.get('http://localhost:3000/newdoc')
     .then(({ data }) => {
       if (data.success) {
-        this.props.socket.emit('join-document', { userID: this.props.userID, docID: data.docs._id}, ({title, state}) => {
-          if (title) { this.props.joinDoc(title, state, data.docs._id); }
+        this.props.socket.emit('join-document', { userID: this.props.userID, docID: data.docs._id}, ({title, state, contributors}) => {
+          if (title) { this.props.joinDoc(title, state, data.docs._id, contributors); }
         });
       }
     })
     .catch(err => console.log(err));
   }
   deleteDocs() {
+    // debugger;
     const selectedDocIDs = this.state.documents
                           .filter((x, index) => this.state.selected.indexOf(index) > -1)
                           .map(doc => doc._id);
@@ -72,31 +83,39 @@ class Home extends React.Component {
     { docIDs: selectedDocIDs, userID: this.props.userID},
     ({success, errors}) => {
       let newDocs = this.state.documents.filter((doc) => Object.keys(success).indexOf(doc._id) < 0).map(doc => Object.assign({}, doc));
-      this.setState({ dialogOpen: false, selected: [] , documents: newDocs });
+      this.setState({ dialogDeleteOpen: false, selected: [] , documents: newDocs });
     })
   }
 
   shareDocs(e) {
-    console.log('hello from share');
-    debugger;
     e.preventDefault();
-    const { selected } = this.state;
-    console.log(this.state.documents.filter((x, index) => selected.indexOf(index) > -1));
-    this.props.socket.emit('share-document', { docIDs: this.state.documents.filter((x, index) => selected.indexOf(index) > -1)})
+    this.props.socket.emit('share-document',
+    { docIDs: this.state.documents.filter((x, index) => this.state.selected.indexOf(index) > -1).map(doc => doc._id),
+      emails: this.state.shareEmail
+    },
+    (({ success }) => {
+      console.log('success in sharedocs?!? ', success );
+      this.setState({dialogShareOpen: false, selected: [] });
+    })
+    )
   }
   openDoc(rowNum, colNum) {
     // console.log('in openDoc', rowNum, colNum);
     if (this.state.documents[rowNum]) {
-      this.props.socket.emit('join-document', { userID: this.props.userID, docID: this.state.documents[rowNum]._id}, ({title, state}) => {
+      console.log(this.props.userID);
+      this.props.socket.emit('join-document',
+      { userID: this.props.userID, loggedIn: this.props.loggedIn, docID: this.state.documents[rowNum]._id}, (data) => {
+        console.log(data);
+      const  {title, state, contributors} = data;
         if (title) {
-          this.props.joinDoc(title, state, this.state.documents[rowNum]._id);
+          this.props.joinDoc(title, state, this.state.documents[rowNum]._id, contributors);
         }
       });
     }
   }
 
   logOut() {
-    axios.get('http://10.2.110.121:3000/logout')
+    axios.get('http://localhost:3000/logout')
     .catch(err => console.log('error in logging out: ', err))
     .then((data) => {
       this.props.socket.disconnect();
@@ -105,6 +124,7 @@ class Home extends React.Component {
   }
 
   render() {
+    console.log(this.props.contributors);
     const dateStyles = {
       weekday: 'short',
       year: 'numeric',
@@ -121,11 +141,11 @@ class Home extends React.Component {
       }
       return this.state.selected.indexOf(index) > -1;
     };
-    const actions = [
+    const deleteActions = [
       <FlatButton
         label="Cancel"
         primary={true}
-        onClick={(e)=> this.deleteDocs(e)}
+        onClick={(e)=> {e.preventDefault(); this.setState({ dialogDeleteOpen: false, selected: [] }) }}
       />,
       <FlatButton
         label="Delete Forever"
@@ -133,16 +153,42 @@ class Home extends React.Component {
         onClick={(e)=> this.deleteDocs(e)}
       />,
     ];
+    const shareActions = [
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={(e)=> {e.preventDefault(); this.setState({ dialogShareOpen: false, selected: [] }) }}
+      />,
+      <FlatButton
+        label="Share"
+        secondary={true}
+        onClick={(e)=> this.shareDocs(e)}
+      />,
+    ]
     const anythingSelected = this.state.selected.length < 1;
     return (<div>
       <Paper>
         <Dialog
-          actions={actions}
+          actions={deleteActions}
           modal={false}
-          open={this.state.dialogOpen}
-          onRequestClose={(e)=> this.deleteDocs(e)}
+          contentStyle={{width: '30%'}}
+          open={this.state.dialogDeleteOpen}
+          // onRequestClose={(e)=> this.deleteDocs(e)}
         >
           Delete Forever?
+        </Dialog>
+
+        <Dialog
+          actions={shareActions}
+          modal={true}
+          open={this.state.dialogShareOpen}
+          contentStyle={{width: '30%'}}
+          // onRequestClose={(e)=> this.shareDocs(e)}
+        >
+          <TextField
+            hintText="Enter Email"
+            onChange={(e)=>this.setState({shareEmail: e.target.value})}
+          />
         </Dialog>
 
         <Toolbar>
@@ -153,10 +199,10 @@ class Home extends React.Component {
               tooltip="new document"
               tooltipPosition="bottom-right"
             >
-              <AddContentIcon style={{nativeColor: 'white'}} />
+              <AddContentIcon />
             </IconButton>
             <IconButton
-              onClick={() => this.setState({ dialogOpen: true })}
+              onClick={() => this.setState({ dialogDeleteOpen: true })}
               disabled={anythingSelected}
               tooltip="delete forever"
               tooltipPosition="bottom-right"
@@ -164,7 +210,7 @@ class Home extends React.Component {
               <DeleteForeverIcon />
             </IconButton>
             <IconButton
-              onClick={(e) => this.shareDocs(e)}
+              onClick={() => this.setState({ dialogShareOpen: true })}
               disabled={anythingSelected}
               tooltip="share"
               tooltipPosition="bottom-right"
@@ -190,12 +236,12 @@ class Home extends React.Component {
           fixedHeader
           multiSelectable
           onRowSelection={selectedRows => this.setState({ selected: selectedRows })}
-          onCellClick={(i, j) =>  j < 0 ? null : this.openDoc(i, j) }
+          onCellClick={(i, j) =>  j < 0 ? null : this.openDoc(i, j) }
         >
           <TableHeader>
             <TableRow>
               <TableHeaderColumn>Title</TableHeaderColumn>
-              <TableHeaderColumn>Created At</TableHeaderColumn>
+              <TableHeaderColumn>Last Modified</TableHeaderColumn>
               <TableHeaderColumn>Owned By</TableHeaderColumn>
             </TableRow>
           </TableHeader>
@@ -228,12 +274,12 @@ Home.propTypes = {
 };
 
 
-const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket, title }) => ({
-  currDOC, room, loggedIn, userID, socket, title
+const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket, title, contributors }) => ({
+  currDOC, room, loggedIn, userID, socket, title, contributors
 });
 
 const mapStateToDispatch = dispatch => ({
-  joinDoc: (title, state, docID) => dispatch({ type: 'JOIN_DOC', title, state, docID }),
+  joinDoc: (title, state, docID, contributors) => dispatch({ type: 'JOIN_DOC', title, state, docID, contributors }),
   logout: () => dispatch({ type: 'LOGOUT' })
 });
 
