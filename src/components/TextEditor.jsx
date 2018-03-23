@@ -143,7 +143,6 @@ class TextEditor extends React.Component {
     });
   }
 
-
   render() {
     return (<div id='content'>
       <div style={{'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between'}}>
@@ -193,7 +192,6 @@ class TextEditor extends React.Component {
                 customStyleMap={customStyleMap}
                 handleKeyCommand={this.handleKeyCommand}
                 keyBindingFn={myKeyBindingFn}
-                // plugins={plugins}
                 blockStyleFn={blockStyleFn}
             />
       </Paper>
