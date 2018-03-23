@@ -107,7 +107,7 @@ io.on('connection', (socket) => {
         if (!secretToken) {
           secretToken = sharedDocs[docAuth.docID] = md5(`${docAuth.docID + Math.random()}miao`);
         }
-        ackCB({ room: secretToken, state: doc.state });
+        ackCB({ title: doc.title, state: doc.state });
         socket.join(secretToken);
       }
     })
@@ -124,8 +124,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('save-document', (docAuth, ackCB) => {
-    console.log('cur STATE:     \n', docAuth.state);
-    Document.findByIdAndUpdate(docAuth.docID, { $set: { state: docAuth.state } },
+    Document.findByIdAndUpdate(docAuth.docID,
+      { $set: { state: docAuth.state, title: docAuth.title } },
       { new: true })
       .exec()
     .then((doc) => {
@@ -133,7 +133,7 @@ io.on('connection', (socket) => {
         ackCB({ success: 'no document found' });
       } else {
         ackCB({ success: true });
-        socket.to(sharedDocs[doc._id]).emit('updated-doc', { state: doc.state });
+        socket.to(sharedDocs[doc._id]).emit('updated-doc', { title: doc.title, state: doc.state });
       }
     })
     .catch((error) => {
@@ -143,18 +143,20 @@ io.on('connection', (socket) => {
   });
 
   socket.on('update-document', (docAuth, ackCB) => {
-    socket.to(sharedDocs[docAuth.docID]).emit('updated-doc', { state: docAuth.state });
+    socket.to(sharedDocs[docAuth.docID]).emit('updated-doc', { title: docAuth.title, state: docAuth.state });
     ackCB({ success: true });
   });
 
   socket.on('leave-document', (docAuth, ackCB) => {
-    Document.findByIdAndUpdate(docAuth.docID, { state: docAuth.state }).exec()
+    Document.findByIdAndUpdate(docAuth.docID,
+      { state: docAuth.state, title: docAuth.title },
+      { new: true }).exec()
         .then((doc) => {
           if (!doc) {
             ackCB({ error: 'no document found' });
           } else {
             ackCB({ success: true });
-            socket.to(sharedDocs[doc._id]).emit('updated-doc', { state: doc.state });
+            socket.to(sharedDocs[doc._id]).emit('updated-doc', { title: doc.title, state: doc.state });
             socket.leave(sharedDocs[doc._id]);
           }
         })

@@ -59,9 +59,8 @@ class TextEditor extends React.Component {
   constructor(props) {
     super(props);
     const { handleUpdate } = this.props;
-    this.props.socket.on('updated-doc', ({state} )=> {
-      console.log('receiving state: ', state);
-      handleUpdate(state)
+    this.props.socket.on('updated-doc', ({ title, state })=> {
+      handleUpdate(state, title)
     });
   }
 
@@ -84,8 +83,9 @@ class TextEditor extends React.Component {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
     console.log('before save\n', stringState);
+    debugger;
     this.props.socket.emit('update-document',
-    { docID: this.props.currDOC, state: stringState,},
+    { docID: this.props.currDOC, state: stringState, title: this.props.title},
     ({ success }) => {
       console.log('success?!', success);
     });
@@ -112,9 +112,9 @@ class TextEditor extends React.Component {
   saveDoc() {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
-    console.log('before save\n', stringState);
+    debugger;
     this.props.socket.emit('save-document',
-    { docID: this.props.currDOC, state: stringState,},
+    { docID: this.props.currDOC, state: stringState, title: this.props.title},
     ({ success }) => {
       console.log('success?!', success);
     });
@@ -124,8 +124,9 @@ class TextEditor extends React.Component {
   leaveDoc() {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
+    debugger;
     this.props.socket.emit('leave-document',
-    { docID: this.props.currDOC, state: stringState },
+    { docID: this.props.currDOC, state: stringState, title: this.props.title },
     ({ success }) => {
       if(success === true){
         this.props.leaveDoc();
@@ -143,11 +144,11 @@ class TextEditor extends React.Component {
   render() {
     return (<div id='content'>
       <div style={{'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between'}}>
-        <TextField hintText={this.props.title ? this.props.title : 'Untitled'}
+        <TextField hintText={this.props.title}
                   underlineShow={false}
                   style={{'fontSize': '20px'}}
                   hintStyle={{'fontStyle': 'italic'}}
-                  onChange={()=>console.log('changed!')}
+                  onChange={(e)=>this.props.updateTitle(e.target.value)}
         />
 
         <div>
@@ -202,11 +203,12 @@ TextEditor.propTypes = {
 };
 
 
-const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket }) => ({
-  currDOC, room, loggedIn, userID, socket
+const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket, title }) => ({
+  currDOC, room, loggedIn, userID, socket, title
 });
 
 const mapStateToDispatch = dispatch => ({
+  updateTitle: title => dispatch({type: 'UPDATE_TITLE', title })
   // joinDoc: (room, state, docID) => dispatch({ type: 'JOIN_DOC', room, state, docID }),
 });
 

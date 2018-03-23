@@ -25,7 +25,7 @@ const inlineStyle = () => ({
 
 });
 
-const Document = ({ updateEditor, editorState, isDarkTheme, changeTheme, currDOC, socket, updateDoc, leaveDoc }) => {
+const Document = ({ updateEditor, editorState, isDarkTheme, changeTheme, currDOC, socket, title, updateDoc, leaveDoc }) => {
 
   return (<MuiThemeProvider muiTheme={getMuiTheme(!isDarkTheme ? lightBaseTheme : darkBaseTheme)}>
     <div>
@@ -35,6 +35,7 @@ const Document = ({ updateEditor, editorState, isDarkTheme, changeTheme, currDOC
         }}/>
         <div style={inlineStyle()}>
           <TextEditor
+            title={title}
             updateEditor={updateEditor}
             editorState={editorState}
             currDOC={currDOC}
@@ -47,7 +48,7 @@ const Document = ({ updateEditor, editorState, isDarkTheme, changeTheme, currDOC
   </MuiThemeProvider>);
 }
 
-const mapStateToProps = ({ editorState, isDarkTheme, currDOC, socket }) => ({ editorState, isDarkTheme, currDOC, socket });
+const mapStateToProps = ({ editorState, isDarkTheme, currDOC, socket, title }) => ({ editorState, isDarkTheme, currDOC, socket, title });
 
 const mapDispatchToProps = (dispatch) => ({
   updateEditor: (editorState) => {
@@ -56,7 +57,7 @@ const mapDispatchToProps = (dispatch) => ({
   changeTheme: (isDarkTheme) => {
     dispatch(handleThemeChange(isDarkTheme))
   },
-  updateDoc: state => dispatch(handleUpdate(state)),
+  updateDoc: (state, title) => dispatch(handleUpdate(state, title)),
   leaveDoc: () => dispatch(handleExit()),
 });
 

@@ -18,9 +18,10 @@ export function handleExit() {
     }
 }
 
-export function handleUpdate(state) {
+export function handleUpdate(state, title) {
   return {
     type: 'UPDATE_DOC',
     state,
+    title,
   }
 }

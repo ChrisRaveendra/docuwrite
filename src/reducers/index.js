@@ -10,7 +10,7 @@ const defaultState = {
   currDOC: null,
   currState: null,
   socket: null,
-  room: null,
+  title: null,
   isDarkTheme: false
 };
 
@@ -31,25 +31,31 @@ const reducer = (state = defaultState, action) => {
         userID: action.data.userID,
         socket: io('http://10.2.110.121:3000/'),
       };
+    case 'UPDATE_TITLE':
+      return {
+        ...state,
+        title: action.title
+      }
     case 'JOIN_DOC':
       return {
         ...state,
         currDOC: action.docID,
         editorState: action.state ? EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))) : EditorState.createEmpty(),
-        room: action.room,
+        title: action.title,
       };
     case 'UPDATE_DOC':
       // debugger;
       return {
         ...state,
         editorState: EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))),
+        title: action.title
       };
     case 'LEAVE_DOC':
       return {
       ...state,
       currDOC: null,
       currState: null,
-      room: null,
+      title: null,
       isDarkTheme: false,
     }
     case 'UPDATE_THEME':
@@ -63,7 +69,7 @@ const reducer = (state = defaultState, action) => {
         loggedIn: null,
         currDOC: null,
         currState: null,
-        room: null,
+        title: null,
         socket: null,
         isDarkTheme: false,
       }
