@@ -41,14 +41,14 @@ class Home extends React.Component {
   }
 
   componentWillMount() {
-    axios.get('http://localhost:3000/docs').then(({ data }) => {
+    axios.get('http://10.2.110.121:3000/docs').then(({ data }) => {
       if (data.success) {
         this.setState({ documents: data.docs });
       }
     }).catch(err => console.log(err));
   }
   createNewDoc() {
-    axios.get('http://localhost:3000/newdoc')
+    axios.get('http://10.2.110.121:3000/newdoc')
     .then(({ data }) => {
       if (data.success) {
         this.props.socket.emit('join-document', { userID: this.props.userID, docID: this.state.documents[rowNum]._id}, ({room, state}) => {
@@ -92,14 +92,14 @@ class Home extends React.Component {
   }
 
   logOut() {
-    axios.get('http://localhost:3000/logout')
+    axios.get('http://10.2.110.121:3000/logout')
     .catch(err => console.log('error in logging out: ', err))
     .then((data) => {
       this.props.socket.disconnect();
       this.props.logout();
     })
   }
-  
+
   render() {
     const dateStyles = {
       weekday: 'short',
@@ -110,7 +110,7 @@ class Home extends React.Component {
       minute: '2-digit',
       second: '2-digit',
     };
-    
+
     const amISelected = (index) => {
       if (typeof this.state.selected === 'string') {
         return this.state.selected === 'all';

@@ -27,7 +27,7 @@ class Login extends React.Component {
   }
 
   handleSubmit() {
-    const url = `http://localhost:3000/${this.state.isLogin ? 'login' : 'signup'}`;
+    const url = `http://10.2.110.121:3000/${this.state.isLogin ? 'login' : 'signup'}`;
     axios.post(url, {
       email: this.state.email,
       username: this.state.username,
