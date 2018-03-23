@@ -13,12 +13,28 @@ const {hasCommandModifier} = KeyBindingUtil;
 import RaisedButton from 'material-ui/RaisedButton';
 import Home from 'material-ui/svg-icons/action/Home'
 
+
 const customStyleMap = {
   MARK: {
     backgroundColor: 'Yellow',
     fontStyle: 'italic'
   }
 };
+
+const ALIGNMENT_DATA_KEY = 'textAlignment';
+const blockStyleFn = (contentBlock) => {
+  const textAlignStyle = contentBlock.getData().get(ALIGNMENT_DATA_KEY);
+  switch (textAlignStyle) {
+    case 'RIGHT':
+      return `align-right`;
+    case 'CENTER':
+      return `align-center`;
+    case 'LEFT':
+      return `align-left`;
+    case 'JUSTIFY':
+      return `align-justify`;
+  }
+}
 
 //bind the cmd-b, cmd-i, and cmd-u keys to trigger style toggles
 const myKeyBindingFn = (e: SyntheticKeyboardEvent): string => {
@@ -64,6 +80,7 @@ class TextEditor extends React.Component {
   //  Tab exits the editor
   //  does show a selection state for bold/italic button click
   handleEditorChange = (editorState) => {
+<<<<<<< HEAD
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
     console.log('before save\n', stringState);
@@ -73,6 +90,9 @@ class TextEditor extends React.Component {
       console.log('success?!', success);
     });
     // console.log(editorState.getCurrentContent().getBlockMap());
+=======
+  //  console.log(this.props.editorState.toJS());
+>>>>>>> 3cb436167dee09ffd0deaf8f7d46cd4eef40af1c
     this.props.updateEditor(editorState);
   }
 
@@ -175,6 +195,8 @@ class TextEditor extends React.Component {
                 customStyleMap={customStyleMap}
                 handleKeyCommand={this.handleKeyCommand}
                 keyBindingFn={myKeyBindingFn}
+                // plugins={plugins}
+                blockStyleFn={blockStyleFn}
             />
       </Paper>
     </div>);

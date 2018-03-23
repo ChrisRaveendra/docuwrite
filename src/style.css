@@ -33,3 +33,19 @@ body {
     border: 1px solid grey;
     padding: 6px;
 } */
+
+.align-right {
+  text-align: right;
+}
+
+.align-left {
+  text-align: left;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-justify {
+  text-align: justify;
+}
