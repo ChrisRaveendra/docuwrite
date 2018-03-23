@@ -50,7 +50,7 @@ router.get('/docs', async (req, res, next) => {
   }
   Document.find({ owners: { $in: [mongoose.Types.ObjectId(req.user.id)] } })
   .populate('ownedBy')
-  .sort({'createdAt': -1})
+  .sort({ createdAt: -1 })
   .exec()
   .catch((err) => {
     console.log('error in fetching documents\n', err);
