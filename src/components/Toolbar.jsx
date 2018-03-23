@@ -84,6 +84,7 @@ export default class Textbar extends React.Component {
 
   handleEditorChange = (editorState) => {
     // debugger;
+    // this.props.
     this.props.updateEditor(editorState);
   }
 
@@ -122,7 +123,7 @@ export default class Textbar extends React.Component {
           <FormatAlignRight hoverColor={'black'} color={'white'}/>
 
           <FormatSize hoverColor={'black'} color={'white'}/>
-          
+
           {/* <div>
           <RaisedButton
             onClick={this.handleClick}

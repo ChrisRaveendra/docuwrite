@@ -30,6 +30,9 @@ import MenuItem from 'material-ui/MenuItem';
 import axios from 'axios';
 import { connect } from 'react-redux';
 
+
+
+
 class Home extends React.Component {
   constructor(props) {
     super(props);
@@ -47,14 +50,15 @@ class Home extends React.Component {
       }
     }).catch(err => console.log(err));
   }
-  createNewDoc() {
+  createNewDoc(e) {
+    debugger;
+    e.preventDefault();
+
     axios.get('http://10.2.110.121:3000/newdoc')
     .then(({ data }) => {
       if (data.success) {
-        this.props.socket.emit('join-document', { userID: this.props.userID, docID: this.state.documents[rowNum]._id}, ({room, state}) => {
-          if (room) {
-            this.props.joinDoc(room, state, { docID: this.state.documents[rowNum]._id});
-          }
+        this.props.socket.emit('join-document', { userID: this.props.userID, docID: data.docs._id}, ({room, state}) => {
+          if (room) { this.props.joinDoc(room, state, data.docs._id); }
         });
       }
     })
@@ -85,7 +89,7 @@ class Home extends React.Component {
     if (this.state.documents[rowNum]) {
       this.props.socket.emit('join-document', { userID: this.props.userID, docID: this.state.documents[rowNum]._id}, ({room, state}) => {
         if (room) {
-          this.props.joinDoc(room, state, { docID: this.state.documents[rowNum]._id});
+          this.props.joinDoc(room, state, this.state.documents[rowNum]._id);
         }
       });
     }
@@ -145,7 +149,7 @@ class Home extends React.Component {
           <ToolbarTitle text={`Welcome ${this.props.loggedIn}`} />
           <ToolbarGroup>
             <IconButton
-              onClick={() => this.createNewDoc()}
+              onClick={(e) => this.createNewDoc(e)}
               tooltip="new document"
               tooltipPosition="bottom-right"
             >

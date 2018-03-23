@@ -123,17 +123,16 @@ io.on('connection', (socket) => {
     console.log('userIDs, ', userIDs);
   });
 
-  socket.on('update-document', (docAuth, ackCB) => {
-    // console.log('cur STATE:     \n', docAuth.state);
-    Document.findByIdAndUpdate(docAuth.docID, { state: docAuth.state }).exec()
+  socket.on('save-document', (docAuth, ackCB) => {
+    console.log('cur STATE:     \n', docAuth.state);
+    Document.findByIdAndUpdate(docAuth.docID, { $set: { state: docAuth.state } },
+      { new: true })
+      .exec()
     .then((doc) => {
       if (!doc) {
         ackCB({ success: 'no document found' });
       } else {
         ackCB({ success: true });
-        console.log('acking, sending state: ', doc.state);
-        console.log('sending updated-doc to room: ', sharedDocs[doc._id]);
-        console.log('number of clients in room: ', io.nsps['/'].adapter.rooms[sharedDocs[doc._id]].length);
         socket.to(sharedDocs[doc._id]).emit('updated-doc', { state: doc.state });
       }
     })
@@ -143,20 +142,25 @@ io.on('connection', (socket) => {
     });
   });
 
+  socket.on('update-document', (docAuth, ackCB) => {
+    socket.to(sharedDocs[docAuth.docID]).emit('updated-doc', { state: docAuth.state });
+    ackCB({ success: true });
+  });
+
   socket.on('leave-document', (docAuth, ackCB) => {
-    console.log(docAuth);
     Document.findByIdAndUpdate(docAuth.docID, { state: docAuth.state }).exec()
         .then((doc) => {
           if (!doc) {
             ackCB({ error: 'no document found' });
           } else {
             ackCB({ success: true });
-            socket.to(sharedDocs[doc.id]).emit('updated-doc', { state: doc.state })
+            socket.to(sharedDocs[doc._id]).emit('updated-doc', { state: doc.state });
+            socket.leave(sharedDocs[doc._id]);
           }
         })
         .catch((error) => {
           console.log('Error from leave-document', error);
-          ackCB({ error });
+          ackCB({ success: error });
         });
   });
 

@@ -64,7 +64,15 @@ class TextEditor extends React.Component {
   //  Tab exits the editor
   //  does show a selection state for bold/italic button click
   handleEditorChange = (editorState) => {
-    console.log(editorState.getCurrentContent().getBlockMap());
+    let stringState = convertToRaw(this.props.editorState.getCurrentContent());
+    stringState = JSON.stringify(stringState);
+    console.log('before save\n', stringState);
+    this.props.socket.emit('update-document',
+    { docID: this.props.currDOC, state: stringState,},
+    ({ success }) => {
+      console.log('success?!', success);
+    });
+    // console.log(editorState.getCurrentContent().getBlockMap());
     this.props.updateEditor(editorState);
   }
 
@@ -87,11 +95,10 @@ class TextEditor extends React.Component {
 
   saveDoc() {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
-
     stringState = JSON.stringify(stringState);
-    console.log(stringState);
-    this.props.socket.emit('update-document',
-    { docID: this.props.currDOC.docID, state: stringState,},
+    console.log('before save\n', stringState);
+    this.props.socket.emit('save-document',
+    { docID: this.props.currDOC, state: stringState,},
     ({ success }) => {
       console.log('success?!', success);
     });
@@ -101,10 +108,20 @@ class TextEditor extends React.Component {
   leaveDoc() {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
-    this.props.socket.emit('leave-document', { userID: this.props.userID, docID: this.props.currDOC.docID, state: stringState }, ({ room, state }) => {
-      this.props.leaveDoc();
+    this.props.socket.emit('leave-document',
+    { docID: this.props.currDOC, state: stringState },
+    ({ success }) => {
+      if(success === true){
+        this.props.leaveDoc();
+      }else{
+        console.log(success);
+      }
       console.log('hello darkness my old friend')
     });
+  }
+
+  updateDoc() {
+
   }
 
   render() {
@@ -123,8 +140,8 @@ class TextEditor extends React.Component {
             onClick={(e) => {
               e.preventDefault();
               console.log('CurrDoc: ', this.props.currDOC)
-              console.log(`Current doc ID: ${this.props.currDOC.docID}`);
-              alert(`Share this code to provide access to your document: ${this.props.currDOC.docID}`)
+              console.log(`Current doc ID: ${this.props.currDOC}`);
+              alert(`Share this code to provide access to your document: ${this.props.currDOC}`)
             }}
           />
           <RaisedButton label="Save"

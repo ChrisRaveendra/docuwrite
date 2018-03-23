@@ -11,6 +11,7 @@ const defaultState = {
   currState: null,
   socket: null,
   room: null,
+  isDarkTheme: false
 };
 
 // defaultState.selectionState = defaultState.editorState.getSelection();
@@ -22,7 +23,6 @@ const reducer = (state = defaultState, action) => {
       return {
         ...state,
         editorState: action.editor,
-        selectionState: action.selection,
       };
     case 'USER_LOGIN':
       return {
@@ -49,7 +49,8 @@ const reducer = (state = defaultState, action) => {
       ...state,
       currDOC: null,
       currState: null,
-      room: null
+      room: null,
+      isDarkTheme: false,
     }
     case 'UPDATE_THEME':
       return {
@@ -64,6 +65,7 @@ const reducer = (state = defaultState, action) => {
         currState: null,
         room: null,
         socket: null,
+        isDarkTheme: false,
       }
     default:
       return state;
