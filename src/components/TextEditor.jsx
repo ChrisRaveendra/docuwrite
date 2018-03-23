@@ -59,7 +59,7 @@ class TextEditor extends React.Component {
   constructor(props) {
     super(props);
     const { handleUpdate } = this.props;
-    this.props.socket.on('updated-doc', ({state} )=> {
+    this.props.socket.on('updated-doc', ({ title, state} )=> {
       console.log('receiving state: ', state);
       handleUpdate(state)
     });
@@ -114,7 +114,7 @@ class TextEditor extends React.Component {
     stringState = JSON.stringify(stringState);
     console.log('before save\n', stringState);
     this.props.socket.emit('save-document',
-    { docID: this.props.currDOC, state: stringState,},
+    { docID: this.props.currDOC, state: stringState, title: this.props.title},
     ({ success }) => {
       console.log('success?!', success);
     });
@@ -136,18 +136,15 @@ class TextEditor extends React.Component {
     });
   }
 
-  updateDoc() {
-
-  }
 
   render() {
     return (<div id='content'>
       <div style={{'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between'}}>
-        <TextField hintText={this.props.title ? this.props.title : 'Untitled'}
+        <TextField hintText={this.props.title}
                   underlineShow={false}
                   style={{'fontSize': '20px'}}
                   hintStyle={{'fontStyle': 'italic'}}
-                  onChange={()=>console.log('changed!')}
+                  onChange={(e)=>this.props.updateTitle(e.target.value)}
         />
 
         <div>
@@ -207,6 +204,7 @@ const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket }) => ({
 });
 
 const mapStateToDispatch = dispatch => ({
+  updateTitle: title => dispatch({ type: 'UPDATE_TITLE', title})
   // joinDoc: (room, state, docID) => dispatch({ type: 'JOIN_DOC', room, state, docID }),
 });
 

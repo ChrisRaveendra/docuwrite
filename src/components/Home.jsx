@@ -87,9 +87,9 @@ class Home extends React.Component {
   openDoc(rowNum, colNum) {
     // console.log('in openDoc', rowNum, colNum);
     if (this.state.documents[rowNum]) {
-      this.props.socket.emit('join-document', { userID: this.props.userID, docID: this.state.documents[rowNum]._id}, ({room, state}) => {
-        if (room) {
-          this.props.joinDoc(room, state, this.state.documents[rowNum]._id);
+      this.props.socket.emit('join-document', { userID: this.props.userID, docID: this.state.documents[rowNum]._id}, ({title, state}) => {
+        if (title) {
+          this.props.joinDoc(title, state, this.state.documents[rowNum]._id);
         }
       });
     }
@@ -233,7 +233,7 @@ const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket }) => ({
 });
 
 const mapStateToDispatch = dispatch => ({
-  joinDoc: (room, state, docID) => dispatch({ type: 'JOIN_DOC', room, state, docID }),
+  joinDoc: (title, state, docID) => dispatch({ type: 'JOIN_DOC', title, state, docID }),
   logout: () => dispatch({ type: 'LOGOUT' })
 });
 

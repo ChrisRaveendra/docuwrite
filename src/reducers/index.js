@@ -10,8 +10,8 @@ const defaultState = {
   currDOC: null,
   currState: null,
   socket: null,
-  room: null,
-  isDarkTheme: false
+  title: null,
+  isDarkTheme: false,
 };
 
 // defaultState.selectionState = defaultState.editorState.getSelection();
@@ -24,6 +24,11 @@ const reducer = (state = defaultState, action) => {
         ...state,
         editorState: action.editor,
       };
+    case 'UPDATE_TITLE':
+      return {
+        ...state,
+        title: action.title,
+      }
     case 'USER_LOGIN':
       return {
         ...state,
@@ -36,22 +41,22 @@ const reducer = (state = defaultState, action) => {
         ...state,
         currDOC: action.docID,
         editorState: action.state ? EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))) : EditorState.createEmpty(),
-        room: action.room,
+        title: action.title,
       };
     case 'UPDATE_DOC':
       // debugger;
       return {
         ...state,
         editorState: EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))),
+        title: action.title,
       };
     case 'LEAVE_DOC':
       return {
-      ...state,
-      currDOC: null,
-      currState: null,
-      room: null,
-      isDarkTheme: false,
-    }
+        ...state,
+        currDOC: null,
+        title: null,
+        isDarkTheme: false,
+      };
     case 'UPDATE_THEME':
       return {
         ...state,
@@ -62,11 +67,10 @@ const reducer = (state = defaultState, action) => {
         ...state,
         loggedIn: null,
         currDOC: null,
-        currState: null,
         room: null,
         socket: null,
         isDarkTheme: false,
-      }
+      };
     default:
       return state;
   }

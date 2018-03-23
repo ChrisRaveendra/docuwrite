@@ -32,16 +32,16 @@
    justifyContent: 'center',
  });
 
- let App = ({ updateEditor, /* updateSelection */ editorState, selectionState, loggedIn, socket, room, currDOC }) =>
+ let App = ({ updateEditor, /* updateSelection */ editorState, selectionState, loggedIn, socket, currDOC, title }) =>
  (<MuiThemeProvider>
    {/* <Document /> */}
    {!loggedIn ? (<Login />) :
-     (room && currDOC ? (<Document />) : (<Home />))
+     (title && currDOC ? (<Document />) : (<Home />))
    }
  </MuiThemeProvider>);
 
- const mapStateToProps = ({ editorState, selectionState, socket, room, currDOC, loggedIn}) => ({
-   editorState, selectionState, socket, room, currDOC, loggedIn });
+ const mapStateToProps = ({ editorState, selectionState, socket, currDOC, loggedIn, title }) => ({
+   editorState, selectionState, socket, currDOC, loggedIn, title });
 
  const mapDispatchToProps = dispatch => ({
    updateEditor: (editorState, selectionState) => {
