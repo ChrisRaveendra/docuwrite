@@ -6,20 +6,13 @@ import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import Toggle from 'material-ui/Toggle'
-
+import { convertToRaw } from 'draft-js';
 
 
 import {connect} from 'react-redux';
 import {handleEditor, handleThemeChange, handleUpdate, handleExit} from '../actions/index';
 
 const inlineStyle = () => ({
-  // 'width': '1000px',
-  // 'height': '500px',
-  // 'display': 'flex',
-  // 'flex': '1',
-  // 'flexDirection': 'column',
-  // 'alignItems': 'center',
-  // 'justifyContent': 'center',
   'overflow': 'visible',
   'height': 'calc(100vh - 160px)',
 
@@ -29,8 +22,20 @@ const Document = ({ updateEditor, editorState, isDarkTheme, changeTheme, currDOC
 
   return (<MuiThemeProvider muiTheme={getMuiTheme(!isDarkTheme ? lightBaseTheme : darkBaseTheme)}>
     <div>
-        <Toggle onToggle={() => {
-          changeTheme(isDarkTheme);
+        <Toggle onToggle={() => {          
+          let stringState = convertToRaw(editorState.getCurrentContent());
+          stringState = JSON.stringify(stringState);
+          socket.emit('update-document',
+          { docID: currDOC, state: stringState, title: title },
+          ({ success }) => {
+            changeTheme(isDarkTheme);
+              // this must be emitted for updates to occur
+              console.log('success?!', success);
+              console.log('title??', title);
+              console.log('newTheme', isDarkTheme)
+              updateEditor(editorState);
+            });
+          
           document.body.style.backgroundColor = !isDarkTheme ? "#3c3b3b" : "#f6f7f9";
         }}/>
         <div style={inlineStyle()}>
@@ -55,9 +60,11 @@ const mapDispatchToProps = (dispatch) => ({
     dispatch(handleEditor(editorState));
   },
   changeTheme: (isDarkTheme) => {
-    dispatch(handleThemeChange(isDarkTheme))
+    dispatch(handleThemeChange(isDarkTheme));
   },
-  updateDoc: (state, title, date) => dispatch(handleUpdate(state, title, date)),
+  updateDoc: (state, title, date) => {
+    dispatch(handleUpdate(state, title, date));
+  },
   leaveDoc: () => dispatch(handleExit()),
 });
 

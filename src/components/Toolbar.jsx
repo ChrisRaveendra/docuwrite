@@ -115,8 +115,6 @@ export default class Textbar extends React.Component {
   }
 
   handleEditorChange = (editorState) => {
-    // debugger;
-    // this.props.
     this.props.updateEditor(editorState);
   }
 

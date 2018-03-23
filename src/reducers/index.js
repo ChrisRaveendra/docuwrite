@@ -44,7 +44,7 @@ const reducer = (state = defaultState, action) => {
         title: action.title,
       };
     case 'UPDATE_DOC':
-      debugger;
+      console.log('action to emit!', action);
       return {
         ...state,
         editorState: EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))),

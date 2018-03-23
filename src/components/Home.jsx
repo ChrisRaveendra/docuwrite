@@ -61,7 +61,6 @@ class Home extends React.Component {
     }).catch(err => console.log(err));
   }
   createNewDoc(e) {
-    debugger;
     e.preventDefault();
 
     axios.get('http://localhost:3000/newdoc')
@@ -75,7 +74,6 @@ class Home extends React.Component {
     .catch(err => console.log(err));
   }
   deleteDocs() {
-    debugger;
     const selectedDocIDs = this.state.documents
                           .filter((x, index) => this.state.selected.indexOf(index) > -1)
                           .map(doc => doc._id);

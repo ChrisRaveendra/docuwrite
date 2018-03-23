@@ -12,7 +12,7 @@ import {getDefaultKeyBinding, KeyBindingUtil} from 'draft-js';
 const {hasCommandModifier} = KeyBindingUtil;
 import RaisedButton from 'material-ui/RaisedButton';
 import Home from 'material-ui/svg-icons/action/Home'
-
+import Snackbar from 'material-ui/Snackbar';
 
 const customStyleMap = {
   MARK: {
@@ -59,11 +59,13 @@ class TextEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      intervalHandler: null
+      intervalHandler: null,
+      open: false,
     }
     const { handleUpdate } = this.props;
-    this.props.socket.on('updated-doc', ({ title, state, date })=> {
-      handleUpdate(state, title, date)
+    this.props.socket.on('updated-doc', ({ state, title, date })=> {
+      console.log('current title:', title);
+      handleUpdate(state, title, date);
     });
   }
   componentDidMount() {
@@ -74,6 +76,12 @@ class TextEditor extends React.Component {
     clearInterval(this.state.intervalHandler);
     this.props.socket.off();
   }
+  
+  handleRequestClose = () => {
+    this.setState({
+      open: false,
+    });
+  };
     // Update editor state & selection state then pass these new states to the UPDATE action
   // This will result in the reducer signaling updates to the DOM
 
@@ -85,22 +93,23 @@ class TextEditor extends React.Component {
   //  shows empty selection state for commands (ctrl + z)
   //  Tab exits the editor
   //  does show a selection state for bold/italic button click
-  handleEditorChange = (editorState) => {
+  handleEditorChange = (editorState, title) => {
 
-    let stringState = convertToRaw(this.props.editorState.getCurrentContent());
+    let stringState = convertToRaw(editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
-    console.log('before save\n', stringState);
-    // debugger;
+    // console.log('before save\n', stringState);
     this.props.socket.emit('update-document',
-    { docID: this.props.currDOC, state: stringState, title: this.props.title},
+    { docID: this.props.currDOC, state: stringState, title: title},
     ({ success }) => {
+      //this must be emitted for updates to occur
       console.log('success?!', success);
+      console.log('title??', title);
     });
     this.props.updateEditor(editorState);
   }
 
 
-  handleKeyCommand = (command: string): DraftHandleValue => {
+  handleKeyCommand = (command) => {
     if (command === 'bold') {
       const newEditorState = styles.fontWeight.toggle(this.props.editorState, 'bold');
       this.handleEditorChange(newEditorState);
@@ -124,13 +133,17 @@ class TextEditor extends React.Component {
     ({ success }) => {
       console.log('success?!', success);
     });
+
+    //snackbar popup nofication for document saves
+    this.setState({
+      open: true,
+    });
   }
 
   //Move up from Doc to User home page
   leaveDoc() {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
-    // debugger;
     this.props.socket.emit('leave-document',
     { docID: this.props.currDOC, state: stringState, title: this.props.title, date: Date.now()},
     ({ success }) => {
@@ -146,11 +159,21 @@ class TextEditor extends React.Component {
   render() {
     return (<div id='content'>
       <div style={{'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between'}}>
-        <TextField hintText={this.props.title}
+        <TextField value={this.props.title}
                   underlineShow={false}
-                  style={{'fontSize': '20px'}}
-                  hintStyle={{'fontStyle': 'italic'}}
-                  onChange={(e)=>this.props.updateTitle(e.target.value)}
+                  style={{'fontSize': '20px', 'fontStyle': 'italic'}}
+                  onChange={(e)=>{
+                    this.props.updateTitle(e.target.value)
+                    this.handleEditorChange(this.props.editorState, e.target.value)
+                  }}
+        />
+        <span>{this.props.title}</span>
+
+        <Snackbar
+          open={this.state.open}
+          message="Your changes have been saved"
+          autoHideDuration={1500}
+          onRequestClose={this.handleRequestClose}
         />
 
         <div>
@@ -204,8 +227,8 @@ TextEditor.propTypes = {
 };
 
 
-const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket, title }) => ({
-  currDOC, room, loggedIn, userID, socket, title
+const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket, title, isDarkTheme }) => ({
+  currDOC, room, loggedIn, userID, socket, title, isDarkTheme
 });
 
 const mapStateToDispatch = dispatch => ({
