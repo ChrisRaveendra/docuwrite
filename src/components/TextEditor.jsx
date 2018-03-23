@@ -69,8 +69,12 @@ class TextEditor extends React.Component {
     });
   }
   componentDidMount() {
-    const _saveDocs = this.saveDoc.bind(this);
-    this.setState({ intervalHandler: _saveDocs() });
+    const _saveDocs = setInterval(
+      () => {
+      console.log('autosave');
+      this.saveDoc()}
+      , 10000);
+    this.setState({ intervalHandler: _saveDocs });
   }
   componentWillUnmount() {
     clearInterval(this.state.intervalHandler);
@@ -167,7 +171,6 @@ class TextEditor extends React.Component {
                     this.handleEditorChange(this.props.editorState, e.target.value)
                   }}
         />
-        <span>{this.props.title}</span>
 
         <Snackbar
           open={this.state.open}
