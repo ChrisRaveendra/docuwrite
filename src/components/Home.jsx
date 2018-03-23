@@ -22,6 +22,7 @@ import IconMenu from 'material-ui/IconMenu';
 import IconButton from 'material-ui/IconButton';
 import AddContentIcon from 'material-ui/svg-icons/content/add';
 import NewDocIcon from 'material-ui/svg-icons/action/note-add';
+import AddCircleIcon from 'material-ui/svg-icons/content/add-circle';
 import TextField from 'material-ui/TextField';
 // import FontIcon from 'material-ui/FontIcon';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
@@ -33,7 +34,12 @@ import axios from 'axios';
 import { connect } from 'react-redux';
 
 
-
+import List, {
+  ListItem,
+  ListItemAvatar,
+  ListItemIcon,
+  ListItemText,
+} from 'material-ui/List';
 
 class Home extends React.Component {
   constructor(props) {
@@ -43,6 +49,7 @@ class Home extends React.Component {
       selected: [],
       dialogDeleteOpen: false,
       dialogShareOpen: false,
+      shareEmail: null
     };
   }
 
@@ -82,11 +89,14 @@ class Home extends React.Component {
 
   shareDocs(e) {
     e.preventDefault();
-    const { selected } = this.state;
-    console.log(this.state.documents.filter((x, index) => selected.indexOf(index) > -1));
     this.props.socket.emit('share-document',
-    { docIDs: this.state.documents.filter((x, index) => selected.indexOf(index) > -1)},
-    (({ success }) => this.setState({dialogShareOpen: false }))
+    { docIDs: this.state.documents.filter((x, index) => this.state.selected.indexOf(index) > -1).map(doc => doc._id),
+      emails: this.state.shareEmail
+    },
+    (({ success }) => {
+      console.log('success?!? ', success );
+      this.setState({dialogShareOpen: false, selected: [] });
+    })
     )
   }
   openDoc(rowNum, colNum) {
@@ -156,7 +166,7 @@ class Home extends React.Component {
         <Dialog
           actions={deleteActions}
           modal={false}
-          contentStyle={{width: '40%'}}
+          contentStyle={{width: '30%'}}
           open={this.state.dialogDeleteOpen}
           // onRequestClose={(e)=> this.deleteDocs(e)}
         >
@@ -167,18 +177,13 @@ class Home extends React.Component {
           actions={shareActions}
           modal={true}
           open={this.state.dialogShareOpen}
-          contentStyle={{width: '40%'}}
+          contentStyle={{width: '30%'}}
           // onRequestClose={(e)=> this.shareDocs(e)}
         >
           <TextField
             hintText="Enter Email"
+            onChange={(e)=>this.setState({shareEmail: e.target.value})}
           />
-          <IconButton
-            tooltip="add user"
-            tooltipPosition="bottom-right"
-          >
-            <AddContentIcon />
-          </IconButton>
         </Dialog>
 
         <Toolbar>

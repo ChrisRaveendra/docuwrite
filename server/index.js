@@ -118,9 +118,25 @@ io.on('connection', (socket) => {
   });
 
   socket.on('share-document', (docAuth, ackCB) => {
-    const { docIDs, userIDs } = docAuth;
-    console.log('docIDs, ', docIDs);
-    console.log('userIDs, ', userIDs);
+    const { docIDs, emails } = docAuth;
+    User.findOne({ email: emails })
+    .then((user) => {
+      Document.update(
+        { _id: { $in: [...docIDs.map(docID => mongoose.Types.ObjectId(docID))] } },
+        { $addToSet: { owners: mongoose.Types.ObjectId(user._id) } },
+        { multi: true })
+      .then((doc) => {
+        ackCB({ success: true });
+      })
+      .catch((err) => {
+        console.log('error: ', err);
+        ackCB({ success: err });
+      });
+    });
+    // Document.update({ _id: { $in: [...docIDs.map(docID => mongoose.Types.ObjectId(docID))] } }, { $addToSet: {}})
+    // Promise.all(docIds.map(doc => Document.findOneAndUpdate({_id: mongoose.Types.ObjectId(doc), 'emails'},)))
+    // Document.find({ _id: { $in: [...docIDs.map(docID => mongoose.Types.ObjectId(docID))] } })
+    // .exec().then(())
   });
 
   socket.on('save-document', (docAuth, ackCB) => {
