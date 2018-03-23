@@ -25,7 +25,7 @@ const inlineStyle = () => ({
 
 });
 
-const Document = ({ updateEditor, editorState, isDarkTheme, changeTheme, currDOC, socket, leaveDoc }) => {
+const Document = ({ updateEditor, editorState, isDarkTheme, changeTheme, currDOC, socket, updateDoc, leaveDoc }) => {
 
   return (<MuiThemeProvider muiTheme={getMuiTheme(!isDarkTheme ? lightBaseTheme : darkBaseTheme)}>
     <div>
@@ -40,6 +40,7 @@ const Document = ({ updateEditor, editorState, isDarkTheme, changeTheme, currDOC
             currDOC={currDOC}
             socket={socket}
             leaveDoc={leaveDoc}
+            handleUpdate={updateDoc}
           />
         </div>
     </div>

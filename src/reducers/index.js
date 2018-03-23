@@ -39,10 +39,10 @@ const reducer = (state = defaultState, action) => {
         room: action.room,
       };
     case 'UPDATE_DOC':
-      debugger;
+      // debugger;
       return {
         ...state,
-        editorState: action.state ? EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))) : EditorState.createEmpty(),
+        editorState: EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))),
       };
     case 'LEAVE_DOC':
       return {

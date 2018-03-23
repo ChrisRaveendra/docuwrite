@@ -124,20 +124,22 @@ io.on('connection', (socket) => {
   });
 
   socket.on('update-document', (docAuth, ackCB) => {
-    console.log('cur STATE:     \n', docAuth.state);
+    // console.log('cur STATE:     \n', docAuth.state);
     Document.findByIdAndUpdate(docAuth.docID, { state: docAuth.state }).exec()
     .then((doc) => {
       if (!doc) {
-        ackCB({ error: 'no document found' });
+        ackCB({ success: 'no document found' });
       } else {
         ackCB({ success: true });
         console.log('acking, sending state: ', doc.state);
-        socket.to(sharedDocs[doc.id]).emit('updated-doc', { state: doc.state });
+        console.log('sending updated-doc to room: ', sharedDocs[doc._id]);
+        console.log('number of clients in room: ', io.nsps['/'].adapter.rooms[sharedDocs[doc._id]].length);
+        socket.to(sharedDocs[doc._id]).emit('updated-doc', { state: doc.state });
       }
     })
     .catch((error) => {
       console.log('Error from update-document', error);
-      ackCB({ error });
+      ackCB({ success: error });
     });
   });
 

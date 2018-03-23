@@ -40,7 +40,19 @@ const {styles, customStyleFn, exporter} = createStyles([
 ], 'CUSTOM_', customStyleMap);
 
 class TextEditor extends React.Component {
-  // Update editor state & selection state then pass these new states to the UPDATE action
+  constructor(props) {
+    super(props);
+    const { handleUpdate } = this.props;
+    this.props.socket.on('updated-doc', ({state} )=> {
+      console.log('receiving state: ', state);
+      handleUpdate(state)
+    });
+  }
+
+  componentWillUnmount() {
+    this.props.socket.off();
+  }
+    // Update editor state & selection state then pass these new states to the UPDATE action
   // This will result in the reducer signaling updates to the DOM
 
   /*  Take in newly changed draftJS editor state & format correctly for use in redux Action
@@ -56,12 +68,7 @@ class TextEditor extends React.Component {
     this.props.updateEditor(editorState);
   }
 
-  componentWillReceiveProps() {
-    this.props.socket.on('updated-doc', ({state} )=> {
-      console.log(state);
-      this.props.handleUpdate(state)
-    });
-  }
+
   handleKeyCommand = (command: string): DraftHandleValue => {
     if (command === 'bold') {
       const newEditorState = styles.fontWeight.toggle(this.props.editorState, 'bold');
@@ -83,8 +90,10 @@ class TextEditor extends React.Component {
 
     stringState = JSON.stringify(stringState);
     console.log(stringState);
-    this.props.socket.emit('update-document', { userID: this.props.userID, docID: this.props.currDOC.docID, state: stringState,}, ({ room, state, title }) => {
-      console.log('success?!')
+    this.props.socket.emit('update-document',
+    { docID: this.props.currDOC.docID, state: stringState,},
+    ({ success }) => {
+      console.log('success?!', success);
     });
   }
 
@@ -105,9 +114,9 @@ class TextEditor extends React.Component {
                   underlineShow={false}
                   style={{'fontSize': '20px'}}
                   hintStyle={{'fontStyle': 'italic'}}
-                  onChange={()=>console.log('changed!')}          
+                  onChange={()=>console.log('changed!')}
         />
-        
+
         <div>
           <RaisedButton
             label="Share"
