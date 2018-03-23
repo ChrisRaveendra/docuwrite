@@ -57,7 +57,7 @@ const mapDispatchToProps = (dispatch) => ({
   changeTheme: (isDarkTheme) => {
     dispatch(handleThemeChange(isDarkTheme))
   },
-  updateDoc: (state, title) => dispatch(handleUpdate(state, title)),
+  updateDoc: (state, title, date) => dispatch(handleUpdate(state, title, date)),
   leaveDoc: () => dispatch(handleExit()),
 });
 

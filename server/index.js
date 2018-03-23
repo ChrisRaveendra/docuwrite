@@ -92,6 +92,15 @@ passport.use(new LocalStrategy((email, password, done) => {
 app.use('/', auth.authRouter(passport));
 app.use('/', routes);
 
+const dateStyles = {
+  weekday: 'short',
+  year: 'numeric',
+  month: 'long',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+};
 
 const sharedDocs = {};
 io.on('connection', (socket) => {
@@ -125,7 +134,7 @@ io.on('connection', (socket) => {
 
   socket.on('save-document', (docAuth, ackCB) => {
     Document.findByIdAndUpdate(docAuth.docID,
-      { $set: { state: docAuth.state, title: docAuth.title } },
+      { $set: { state: docAuth.state, title: docAuth.title, createdAt: docAuth.date } },
       { new: true })
       .exec()
     .then((doc) => {
@@ -133,7 +142,7 @@ io.on('connection', (socket) => {
         ackCB({ success: 'no document found' });
       } else {
         ackCB({ success: true });
-        socket.to(sharedDocs[doc._id]).emit('updated-doc', { title: doc.title, state: doc.state });
+        socket.to(sharedDocs[doc._id]).emit('updated-doc', { title: doc.title, state: doc.state});
       }
     })
     .catch((error) => {
@@ -149,7 +158,7 @@ io.on('connection', (socket) => {
 
   socket.on('leave-document', (docAuth, ackCB) => {
     Document.findByIdAndUpdate(docAuth.docID,
-      { state: docAuth.state, title: docAuth.title },
+      { state: docAuth.state, title: docAuth.title, createdAt: docAuth.date },
       { new: true }).exec()
         .then((doc) => {
           if (!doc) {

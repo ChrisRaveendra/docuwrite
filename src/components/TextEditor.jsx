@@ -62,8 +62,8 @@ class TextEditor extends React.Component {
       intervalHandler: null
     }
     const { handleUpdate } = this.props;
-    this.props.socket.on('updated-doc', ({ title, state })=> {
-      handleUpdate(state, title)
+    this.props.socket.on('updated-doc', ({ title, state, date })=> {
+      handleUpdate(state, title, date)
     });
   }
   componentDidMount() {
@@ -121,7 +121,7 @@ class TextEditor extends React.Component {
     stringState = JSON.stringify(stringState);
     // debugger;
     this.props.socket.emit('save-document',
-    { docID: this.props.currDOC, state: stringState, title: this.props.title},
+    { docID: this.props.currDOC, state: stringState, title: this.props.title, date: Date.now()},
     ({ success }) => {
       console.log('success?!', success);
     });
@@ -133,7 +133,7 @@ class TextEditor extends React.Component {
     stringState = JSON.stringify(stringState);
     // debugger;
     this.props.socket.emit('leave-document',
-    { docID: this.props.currDOC, state: stringState, title: this.props.title },
+    { docID: this.props.currDOC, state: stringState, title: this.props.title, date: Date.now()},
     ({ success }) => {
       if(success === true){
         this.props.leaveDoc();
