@@ -107,6 +107,7 @@ io.on('connection', (socket) => {
         if (!secretToken) {
           secretToken = sharedDocs[docAuth.docID] = md5(`${docAuth.docID + Math.random()}miao`);
         }
+        console.log('sending ack to socket')
         ackCB({ title: doc.title, state: doc.state });
         socket.join(secretToken);
       }

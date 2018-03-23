@@ -1,6 +1,7 @@
 import { Editor, EditorState, SelectionState, RichUtils, convertFromRaw } from 'draft-js';
 import { debug } from 'util';
 import io from 'socket.io-client';
+const addr = 'http://10.2.110.121';
 
 const defaultState = {
   editorState: EditorState.createEmpty(),
@@ -34,7 +35,7 @@ const reducer = (state = defaultState, action) => {
         ...state,
         loggedIn: action.data.username,
         userID: action.data.userID,
-        socket: io('http://10.2.110.121:3000/'),
+        socket: io('http://10.2.110.121/:3000'),
       };
     case 'JOIN_DOC':
       return {

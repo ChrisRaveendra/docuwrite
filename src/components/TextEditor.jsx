@@ -58,14 +58,24 @@ const {styles, customStyleFn, exporter} = createStyles([
 class TextEditor extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      intervalHandler: null
+    }
     const { handleUpdate } = this.props;
     this.props.socket.on('updated-doc', ({ title, state} )=> {
+      debugger;
       console.log('receiving state: ', state);
       handleUpdate(state)
     });
   }
 
+  componentDidMount() {
+    // debugger;
+    // this.setState({intervalHandler: setInterval(() => this.saveDoc(), 5000 )});
+  }
+
   componentWillUnmount() {
+    // clearInterval(this.state.intervalHandler);
     this.props.socket.off();
   }
     // Update editor state & selection state then pass these new states to the UPDATE action
@@ -112,7 +122,6 @@ class TextEditor extends React.Component {
   saveDoc() {
     let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
-    console.log('before save\n', stringState);
     this.props.socket.emit('save-document',
     { docID: this.props.currDOC, state: stringState, title: this.props.title},
     ({ success }) => {
