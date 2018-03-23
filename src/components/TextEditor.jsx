@@ -69,11 +69,13 @@ class TextEditor extends React.Component {
 
   componentDidMount() {
     // debugger;
-    // this.setState({intervalHandler: setInterval(() => this.saveDoc(), 5000 )});
+    const _saveDoc = this.saveDoc.bind(this);
+    const interval = setInterval(() => _saveDoc(), 5000 )
+    this.setState({intervalHandler: interval});
   }
 
   componentWillUnmount() {
-    // clearInterval(this.state.intervalHandler);
+    clearInterval(this.state.intervalHandler);
     this.props.socket.off();
   }
     // Update editor state & selection state then pass these new states to the UPDATE action

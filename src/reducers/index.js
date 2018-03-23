@@ -29,7 +29,7 @@ const reducer = (state = defaultState, action) => {
       return {
         ...state,
         title: action.title,
-      }
+      };
     case 'USER_LOGIN':
       return {
         ...state,
@@ -37,11 +37,6 @@ const reducer = (state = defaultState, action) => {
         userID: action.data.userID,
         socket: io('http://10.2.110.121/:3000'),
       };
-    case 'UPDATE_TITLE':
-      return {
-        ...state,
-        title: action.title
-      }
     case 'JOIN_DOC':
       return {
         ...state,
@@ -54,6 +49,8 @@ const reducer = (state = defaultState, action) => {
       return {
         ...state,
         editorState: EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))),
+        title: action.title,
+      }
     case 'UPDATE_THEME':
       return {
         ...state,
