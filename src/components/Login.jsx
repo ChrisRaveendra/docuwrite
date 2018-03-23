@@ -4,7 +4,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Paper from 'material-ui/Paper';
 import axios from 'axios';
 import { connect } from 'react-redux';
-// axios.defaults.baseURL = 'https://localhost:3000';
+// axios.defaults.baseURL = 'http://localhost:3000';
 class Login extends React.Component {
   constructor(props) {
     super(props);
@@ -27,7 +27,7 @@ class Login extends React.Component {
   }
 
   handleSubmit() {
-    const url = `http://10.2.110.121:3000/${this.state.isLogin ? 'login' : 'signup'}`;
+    const url = `http://localhost:3000/${this.state.isLogin ? 'login' : 'signup'}`;
     axios.post(url, {
       email: this.state.email,
       username: this.state.username,

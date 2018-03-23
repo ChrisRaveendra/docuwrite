@@ -29,7 +29,7 @@ const reducer = (state = defaultState, action) => {
         ...state,
         loggedIn: action.data.username,
         userID: action.data.userID,
-        socket: io('http://10.2.110.121:3000/'),
+        socket: io('http://localhost:3000/'),
       };
     case 'UPDATE_TITLE':
       return {
@@ -44,11 +44,12 @@ const reducer = (state = defaultState, action) => {
         title: action.title,
       };
     case 'UPDATE_DOC':
-      // debugger;
+      debugger;
       return {
         ...state,
         editorState: EditorState.createWithContent(convertFromRaw(JSON.parse(action.state))),
-        title: action.title
+        title: action.title,
+        date: action.date
       };
     case 'LEAVE_DOC':
       return {
@@ -70,6 +71,7 @@ const reducer = (state = defaultState, action) => {
         currDOC: null,
         currState: null,
         title: null,
+        date: null,
         socket: null,
         isDarkTheme: false,
       }

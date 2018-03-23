@@ -54,7 +54,7 @@ class Home extends React.Component {
   }
 
   componentWillMount() {
-    axios.get('http://10.2.110.121:3000/docs').then(({ data }) => {
+    axios.get('http://localhost:3000/docs').then(({ data }) => {
       if (data.success) {
         this.setState({ documents: data.docs });
       }
@@ -64,7 +64,7 @@ class Home extends React.Component {
     debugger;
     e.preventDefault();
 
-    axios.get('http://10.2.110.121:3000/newdoc')
+    axios.get('http://localhost:3000/newdoc')
     .then(({ data }) => {
       if (data.success) {
         this.props.socket.emit('join-document', { userID: this.props.userID, docID: data.docs._id}, ({title, state}) => {
@@ -111,7 +111,7 @@ class Home extends React.Component {
   }
 
   logOut() {
-    axios.get('http://10.2.110.121:3000/logout')
+    axios.get('http://localhost:3000/logout')
     .catch(err => console.log('error in logging out: ', err))
     .then((data) => {
       this.props.socket.disconnect();
@@ -236,7 +236,7 @@ class Home extends React.Component {
           <TableHeader>
             <TableRow>
               <TableHeaderColumn>Title</TableHeaderColumn>
-              <TableHeaderColumn>Created At</TableHeaderColumn>
+              <TableHeaderColumn>Last Modified</TableHeaderColumn>
               <TableHeaderColumn>Owned By</TableHeaderColumn>
             </TableRow>
           </TableHeader>
