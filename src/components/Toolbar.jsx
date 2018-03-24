@@ -189,20 +189,21 @@ export default class Textbar extends React.Component {
             }}
           />
           <Popover
+            disableAutoFocus={true}
             open={this.state[`popOver${type}`]}
             anchorEl={this.state.fontMenuEl}
             anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
             targetOrigin={{horizontal: 'left', vertical: 'top'}}
-            onRequestClose={() => this.setState({[`popOver${type}`]: false})}
+          //  onRequestClose={() => this.setState({[`popOver${type}`]: false})}
           >
-            <Menu>
+            <Menu disableAutoFocus={true}>
               {array.map((val) => (<MenuItem
                 primaryText={val}
                 onMouseDown={(e) => {
                   e.preventDefault()
                   this.setState({[`popOver${type}`]:false})
                   this[fnName](val)
-                }} />)
+                }}/>)
               )}
             </Menu>
           </Popover>

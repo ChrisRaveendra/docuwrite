@@ -35,12 +35,15 @@ const blockStyleFn = (contentBlock) => {
 //bind the cmd-b, cmd-i, and cmd-u keys to trigger style toggles
 const myKeyBindingFn = (e: SyntheticKeyboardEvent): string => {
   if (e.keyCode === 66 /* `b` key */ && hasCommandModifier(e)) {
+    console.log('hit b')
     return 'bold';
   }
-  if (e.keyCode === 73 /* `b` key */ && hasCommandModifier(e)) {
+  if (e.keyCode === 73 /* `i` key */ && hasCommandModifier(e)) {
+    console.log('hit i!')
     return 'italic';
   }
-  if (e.keyCode === 85 /* `b` key */ && hasCommandModifier(e)) {
+  if (e.keyCode === 85 /* `u` key */ && hasCommandModifier(e)) {
+    console.log('hit u')
     return 'underline';
   }
   return getDefaultKeyBinding(e);
@@ -63,9 +66,7 @@ class TextEditor extends React.Component {
       handleUpdate(state, title, date)
     });
     this.props.socket.on('user-joined', ({name, userID}) => {
-      console.log('before', this.state.users);
       this.setState({users: [...this.state.users, {name: name, userID: userID}] });
-      console.log('after', this.state.users);
     });
   }
   componentDidMount() {
@@ -87,7 +88,7 @@ class TextEditor extends React.Component {
   //  shows empty selection state for commands (ctrl + z)
   //  Tab exits the editor
   //  does show a selection state for bold/italic button click
-  handleSelections = (editorState, isLeaving) => {
+  handleSelections = (editorState, isLeaving = true) => {
     let currentContent = editorState.getCurrentContent();
     const currentSelection = editorState.getSelection();
     const firstBlock = currentContent.getFirstBlock();
@@ -104,19 +105,16 @@ class TextEditor extends React.Component {
   }
 
   handleEditorChange = (editorState) => {
-    editorState = this.handleSelections(editorState, false);
+    //editorState = this.handleSelections(editorState, false);
     let stringState = convertToRaw(editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
-    console.log('before save\n', stringState);
-    // debugger;
     this.props.socket.emit('update-document',
     { docID: this.props.currDOC, state: stringState, title: this.props.title},
     ({ success }) => {
-      console.log('success?!', success);
+    //  console.log('success?!', success);
     });
     this.props.updateEditor(editorState);
   }
-
 
   handleKeyCommand = (command: string): DraftHandleValue => {
     if (command === 'bold') {
@@ -165,7 +163,7 @@ class TextEditor extends React.Component {
   render() {
     for(let i =0; i < this.props.contributors.length; i++) {
       if(this.props.contributors[i] !== this.props.userID) {
-        console.log(this.props.contributors[i], i);
+      //  console.log(this.props.contributors[i], i);
         customStyleMap[this.props.contributors[i]] = {
           backgroundColor: USER_COLORS[i % USER_COLORS.length]
         }
