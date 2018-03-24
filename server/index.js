@@ -161,7 +161,7 @@ io.on('connection', (socket) => {
         ackCB({ success: 'no document found' });
       } else {
         ackCB({ success: true });
-        socket.to(sharedDocs[doc._id]).emit('updated-doc', { title: doc.title, state: doc.state});
+        socket.to(sharedDocs[doc._id]).emit('updated-doc', { state: doc.state, title: doc.title});
       }
     })
     .catch((error) => {

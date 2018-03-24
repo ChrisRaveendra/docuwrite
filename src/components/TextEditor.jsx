@@ -12,6 +12,7 @@ import {getDefaultKeyBinding, KeyBindingUtil} from 'draft-js';
 const {hasCommandModifier} = KeyBindingUtil;
 import RaisedButton from 'material-ui/RaisedButton';
 import Home from 'material-ui/svg-icons/action/Home'
+import Snackbar from 'material-ui/Snackbar';
 
 
 const customStyleMap = {};
@@ -59,24 +60,34 @@ class TextEditor extends React.Component {
     super(props);
     this.state = {
       intervalHandler: null,
-      users: []
+      open: false,
     }
     const { handleUpdate } = this.props;
-    this.props.socket.on('updated-doc', ({ title, state, date })=> {
-      handleUpdate(state, title, date)
-    });
-    this.props.socket.on('user-joined', ({name, userID}) => {
-      this.setState({users: [...this.state.users, {name: name, userID: userID}] });
+    this.props.socket.on('updated-doc', ({ state, title, date })=> {
+      console.log('current title:', title);
+      handleUpdate(state, title, date);
     });
   }
+
   componentDidMount() {
-    const _saveDocs = this.saveDoc.bind(this);
-    this.setState({ intervalHandler: _saveDocs() });
+    const _saveDocs = setInterval(
+      () => {
+      console.log('autosave');
+      this.saveDoc()}
+      , 23000);
+    this.setState({ intervalHandler: _saveDocs });
   }
+
   componentWillUnmount() {
     clearInterval(this.state.intervalHandler);
     this.props.socket.off();
   }
+
+  handleRequestClose = () => {
+    this.setState({
+      open: false,
+    });
+  };
     // Update editor state & selection state then pass these new states to the UPDATE action
   // This will result in the reducer signaling updates to the DOM
 
@@ -88,28 +99,28 @@ class TextEditor extends React.Component {
   //  shows empty selection state for commands (ctrl + z)
   //  Tab exits the editor
   //  does show a selection state for bold/italic button click
-  handleSelections = (editorState, isLeaving = true) => {
-    let currentContent = editorState.getCurrentContent();
-    const currentSelection = editorState.getSelection();
-    const firstBlock = currentContent.getFirstBlock();
-    const lastBlock = currentContent.getLastBlock();
-    const allSelection = SelectionState.createEmpty(firstBlock.getKey()).merge({
-      focusKey: lastBlock.getKey(),
-      focusOffset: lastBlock.getLength(),
-    });
+  // handleSelections = (editorState, isLeaving = true) => {
+  //   let currentContent = editorState.getCurrentContent();
+  //   const currentSelection = editorState.getSelection();
+  //   const firstBlock = currentContent.getFirstBlock();
+  //   const lastBlock = currentContent.getLastBlock();
+  //   const allSelection = SelectionState.createEmpty(firstBlock.getKey()).merge({
+  //     focusKey: lastBlock.getKey(),
+  //     focusOffset: lastBlock.getLength(),
+  //   });
+  //
+  //   currentContent = Modifier.removeInlineStyle(currentContent, allSelection, this.props.userID);
+  //   currentContent = isLeaving ? currentContent : Modifier.applyInlineStyle(currentContent, currentSelection, this.props.userID);
+  //   editorState = EditorState.createWithContent(currentContent);
+  //   return EditorState.forceSelection(editorState, currentSelection);
+  // }
 
-    currentContent = Modifier.removeInlineStyle(currentContent, allSelection, this.props.userID);
-    currentContent = isLeaving ? currentContent : Modifier.applyInlineStyle(currentContent, currentSelection, this.props.userID);
-    editorState = EditorState.createWithContent(currentContent);
-    return EditorState.forceSelection(editorState, currentSelection);
-  }
-
-  handleEditorChange = (editorState) => {
+  handleEditorChange = (editorState, title) => {
     //editorState = this.handleSelections(editorState, false);
     let stringState = convertToRaw(editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
     this.props.socket.emit('update-document',
-    { docID: this.props.currDOC, state: stringState, title: this.props.title},
+    { docID: this.props.currDOC, state: stringState, title: title || this.props.title},
     ({ success }) => {
     //  console.log('success?!', success);
     });
@@ -140,12 +151,17 @@ class TextEditor extends React.Component {
     ({ success }) => {
       console.log('success?!', success);
     });
+
+    // snackbar popup notification
+    this.setState({
+      open: true,
+    });
   }
 
   //Move up from Doc to User home page
   leaveDoc() {
-    const editorState = this.handleSelections(this.props.editorState, true);
-    let stringState = convertToRaw(editorState.getCurrentContent());
+    // const editorState = this.handleSelections(, true);
+    let stringState = convertToRaw(this.props.editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
     // debugger;
     this.props.socket.emit('leave-document',
@@ -156,7 +172,6 @@ class TextEditor extends React.Component {
       }else{
         console.log(success);
       }
-      console.log('hello darkness my old friend')
     });
   }
 
@@ -171,13 +186,21 @@ class TextEditor extends React.Component {
     }
     return (<div id='content'>
       <div style={{'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between'}}>
-        <TextField hintText={this.props.title}
+        <TextField value={this.props.title}
                   underlineShow={false}
-                  style={{'fontSize': '20px'}}
-                  hintStyle={{'fontStyle': 'italic'}}
-                  onChange={(e)=>this.props.updateTitle(e.target.value)}
+                  style={{'fontSize': '20px', 'fontStyle': 'italic'}}
+                  onChange={(e)=>{
+                    this.props.updateTitle(e.target.value)
+                    this.handleEditorChange(this.props.editorState, e.target.value)
+                  }}
         />
 
+        <Snackbar
+          open={this.state.open}
+          message="Your changes have been saved"
+          autoHideDuration={1500}
+          onRequestClose={this.handleRequestClose}
+        />
         <div>
           <RaisedButton
             label="Share"
@@ -229,8 +252,8 @@ TextEditor.propTypes = {
 };
 
 
-const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket, title }) => ({
-  currDOC, room, loggedIn, userID, socket, title
+const mapStateToProps = ({ currDOC, room, loggedIn, userID, socket, title, isDarkTheme }) => ({
+  currDOC, room, loggedIn, userID, socket, title, isDarkTheme
 });
 
 const mapStateToDispatch = dispatch => ({

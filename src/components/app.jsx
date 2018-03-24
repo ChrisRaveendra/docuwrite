@@ -36,7 +36,7 @@
  (<MuiThemeProvider>
    {/* <Document /> */}
    {!loggedIn ? (<Login />) :
-     (title && currDOC ? (<Document />) : (<Home />))
+     (title || currDOC ? (<Document />) : (<Home />))
    }
  </MuiThemeProvider>);
 
