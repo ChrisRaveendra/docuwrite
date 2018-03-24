@@ -110,7 +110,7 @@ class TextEditor extends React.Component {
       focusOffset: lastBlock.getLength(),
     });
 
-    currentContent = Modifier.removeInlineStyle(currentContent, allSelection, this.props.userID);
+    //currentContent = Modifier.removeInlineStyle(currentContent, allSelection, this.props.userID);
     currentContent = isLeaving ? currentContent : Modifier.applyInlineStyle(currentContent, currentSelection, this.props.userID);
     editorState = EditorState.createWithContent(currentContent);
     return EditorState.forceSelection(editorState, currentSelection);
@@ -234,7 +234,7 @@ class TextEditor extends React.Component {
                 editorState={this.props.editorState}
             />
         <Editor className='editor'
-                editorState={this.handleSelections(this.props.editorState, false)}
+                editorState={this.props.editorState}
                 onChange={this.handleEditorChange}
                 spellCheck={true}
                 ref='editor'

@@ -24,7 +24,7 @@ import AddContentIcon from 'material-ui/svg-icons/content/add';
 import NewDocIcon from 'material-ui/svg-icons/action/note-add';
 import AddCircleIcon from 'material-ui/svg-icons/content/add-circle';
 import TextField from 'material-ui/TextField';
-// import FontIcon from 'material-ui/FontIcon';
+import CircularProgress from 'material-ui/CircularProgress';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import SocialShareIcon from 'material-ui/svg-icons/social/share';
 import DeleteForeverIcon from 'material-ui/svg-icons/action/delete-forever';
@@ -74,7 +74,7 @@ class Home extends React.Component {
     })
     .catch(err => console.log(err));
   }
-  
+
   deleteDocs() {
     // debugger;
     const selectedDocIDs = this.state.documents
@@ -262,6 +262,7 @@ class Home extends React.Component {
           </TableBody>
         </Table>
       </Paper>
+      <div style={{display: 'flex', justifyContent: 'center'}}>{this.state.documents.length === 0 ? <CircularProgress /> : null}</div>
     </div>
     );
   }
