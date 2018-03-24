@@ -35,13 +35,23 @@ module.exports = {
             message: 'Signup did not save user',
           });
         }
-        console.log('session: ', req.session);
-        console.log('user : ', req.user);
-        return res.status(200).json({
-          success: true,
-          userID: user._id,
-          username: user.username
-        });
+        req.login(user, function (err) {
+          if (err) {
+            console.log('error in automatically logging in user: ',err);
+            return res.status(403).json({
+              success: false,
+              message: err
+            });
+          } else {
+            return res.status(200).json({
+              success: true,
+              userID: user._id,
+              username: user.username
+            })
+          }
+        })
+        // console.log('session: ', req.session);
+        // console.log('user : ', req.user);
       });
     });
 
