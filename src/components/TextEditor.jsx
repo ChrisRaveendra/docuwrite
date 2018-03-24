@@ -49,7 +49,6 @@ const myKeyBindingFn = (e: SyntheticKeyboardEvent): string => {
   }
   return getDefaultKeyBinding(e);
 }
-
 // Passing the customStyleMap is optional
 const {styles, customStyleFn, exporter} = createStyles([
   'font-size', 'color', 'font-weight', 'font-style', 'text-decoration', 'text-align'
@@ -61,6 +60,7 @@ class TextEditor extends React.Component {
     this.state = {
       intervalHandler: null,
       open: false,
+      dialogShareOpen: false,
     }
     const { handleUpdate } = this.props;
     this.props.socket.on('updated-doc', ({ state, title, date })=> {
@@ -74,7 +74,7 @@ class TextEditor extends React.Component {
       () => {
       console.log('autosave');
       this.saveDoc()}
-      , 23000);
+      , 22500);
     this.setState({ intervalHandler: _saveDocs });
   }
 
@@ -99,21 +99,22 @@ class TextEditor extends React.Component {
   //  shows empty selection state for commands (ctrl + z)
   //  Tab exits the editor
   //  does show a selection state for bold/italic button click
-  // handleSelections = (editorState, isLeaving = true) => {
-  //   let currentContent = editorState.getCurrentContent();
-  //   const currentSelection = editorState.getSelection();
-  //   const firstBlock = currentContent.getFirstBlock();
-  //   const lastBlock = currentContent.getLastBlock();
-  //   const allSelection = SelectionState.createEmpty(firstBlock.getKey()).merge({
-  //     focusKey: lastBlock.getKey(),
-  //     focusOffset: lastBlock.getLength(),
-  //   });
-  //
-  //   currentContent = Modifier.removeInlineStyle(currentContent, allSelection, this.props.userID);
-  //   currentContent = isLeaving ? currentContent : Modifier.applyInlineStyle(currentContent, currentSelection, this.props.userID);
-  //   editorState = EditorState.createWithContent(currentContent);
-  //   return EditorState.forceSelection(editorState, currentSelection);
-  // }
+  handleSelections = (editorState, isLeaving = true) => {
+    // debugger;
+    let currentContent = editorState.getCurrentContent();
+    const currentSelection = editorState.getSelection();
+    const firstBlock = currentContent.getFirstBlock();
+    const lastBlock = currentContent.getLastBlock();
+    const allSelection = SelectionState.createEmpty(firstBlock.getKey()).merge({
+      focusKey: lastBlock.getKey(),
+      focusOffset: lastBlock.getLength(),
+    });
+
+    currentContent = Modifier.removeInlineStyle(currentContent, allSelection, this.props.userID);
+    currentContent = isLeaving ? currentContent : Modifier.applyInlineStyle(currentContent, currentSelection, this.props.userID);
+    editorState = EditorState.createWithContent(currentContent);
+    return EditorState.forceSelection(editorState, currentSelection);
+  }
 
   handleEditorChange = (editorState, title) => {
     //editorState = this.handleSelections(editorState, false);
@@ -160,8 +161,8 @@ class TextEditor extends React.Component {
 
   //Move up from Doc to User home page
   leaveDoc() {
-    // const editorState = this.handleSelections(, true);
-    let stringState = convertToRaw(this.props.editorState.getCurrentContent());
+    const editorState = this.handleSelections(this.props.editorState, true);
+    let stringState = convertToRaw(editorState.getCurrentContent());
     stringState = JSON.stringify(stringState);
     // debugger;
     this.props.socket.emit('leave-document',
@@ -186,6 +187,7 @@ class TextEditor extends React.Component {
     }
     return (<div id='content'>
       <div style={{'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between'}}>
+
         <TextField value={this.props.title}
                   underlineShow={false}
                   style={{'fontSize': '20px', 'fontStyle': 'italic'}}
@@ -232,7 +234,7 @@ class TextEditor extends React.Component {
                 editorState={this.props.editorState}
             />
         <Editor className='editor'
-                editorState={this.props.editorState}
+                editorState={this.handleSelections(this.props.editorState, false)}
                 onChange={this.handleEditorChange}
                 spellCheck={true}
                 ref='editor'

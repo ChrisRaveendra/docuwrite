@@ -74,6 +74,7 @@ class Home extends React.Component {
     })
     .catch(err => console.log(err));
   }
+  
   deleteDocs() {
     // debugger;
     const selectedDocIDs = this.state.documents
